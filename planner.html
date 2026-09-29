@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyPilot - 6-Month Paragliding Training & Weather Planner</title>
+  <style>
+    :root {
+      --bg: #0b1320;
+      --card-bg: #132238;
+      --card-border: #1e3352;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #38bdf8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px 16px 80px 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 24px;
+      background: linear-gradient(135deg, #102a4e, #0c1a2e);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 12px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background-color: var(--card-border);
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 14px;
+      background-color: #0b1526;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #1e3352;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background-color: #27446d;
+    }
+
+    /* Weather Result Box */
+    .weather-decision-box {
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      margin-top: 20px;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .status-go {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: #34d399;
+    }
+
+    .status-caution {
+      background-color: var(--warning-bg);
+      border-color: var(--warning);
+      color: #fbbf24;
+    }
+
+    .status-danger {
+      background-color: var(--danger-bg);
+      border-color: var(--danger);
+      color: #f87171;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .status-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .status-parameters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      text-align: left;
+      background: rgba(0,0,0,0.25);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .param-item span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .param-item strong {
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    /* Compass needle & graphics */
+    .compass-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 16px 0;
+    }
+
+    .compass {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--card-border);
+      position: relative;
+      background: #09121e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compass-mark {
+      position: absolute;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-muted);
+    }
+    .compass-mark.n { top: 4px; color: var(--accent); }
+    .compass-mark.s { bottom: 4px; }
+    .compass-mark.e { right: 6px; }
+    .compass-mark.w { left: 6px; }
+
+    .compass-needle {
+      width: 4px;
+      height: 70px;
+      position: absolute;
+      transform-origin: center center;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .compass-needle::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -4px;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 35px solid #ef4444;
+    }
+
+    .compass-needle::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -4px;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 35px solid #94a3b8;
+    }
+
+    /* 6-Month Roadmap Styles */
+    .overall-progress {
+      background: rgba(0,0,0,0.3);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar-bg {
+      background: #0d1a2d;
+      height: 14px;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--success));
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .month-card {
+      background: #0f1c30;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .month-header {
+      padding: 16px;
+      background: #14243b;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .month-header:hover {
+      background: #182c47;
+    }
+
+    .month-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .month-badge {
+      background: var(--primary);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .month-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .month-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .month-body {
+      padding: 16px;
+      display: block;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      margin-top: 3px;
+    }
+
+    .task-text {
+      flex: 1;
+    }
+
+    .task-text strong {
+      display: block;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+    }
+
+    .task-text p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Seasonal Table */
+    .season-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .season-table th, .season-table td {
+      padding: 12px;
+      border: 1px solid var(--card-border);
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .season-table th {
+      background-color: #172942;
+      color: var(--accent);
+    }
+
+    .season-table tr:nth-child(even) {
+      background-color: #0d1726;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .pill-green { background: var(--success-bg); color: #34d399; }
+    .pill-yellow { background: var(--warning-bg); color: #fbbf24; }
+    .pill-red { background: var(--danger-bg); color: #f87171; }
+
+    /* Log Book Table */
+    .log-table-container {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .log-table th, .log-table td {
+      padding: 10px;
+      border: 1px solid var(--card-border);
+      text-align: left;
+    }
+
+    .log-table th {
+      background-color: #162840;
+      color: #fff;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #0d1829;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--card-border);
+    }
+    .checklist-item input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--success);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .status-parameters {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>FlyMaster: 6-Month Paragliding Plan & Weather Guesser</h1>
+    <p>Comprehensive progression blueprint from ground handling to independent pilot, coupled with a specialized weather analysis engine for North Iran & Mazandaran coastal-mountain flights.</p>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('weather-tab')">Weather Guesser & Flyability</button>
+    <button class="tab-btn" onclick="switchTab('roadmap-tab')">6-Month Training Plan</button>
+    <button class="tab-btn" onclick="switchTab('season-tab')">Mazandaran Flying Seasons</button>
+    <button class="tab-btn" onclick="switchTab('log-tab')">Training Flight Log</button>
+    <button class="tab-btn" onclick="switchTab('checklist-tab')">Pre-Flight Safety 5-Point</button>
+  </div>
+
+  <!-- TAB 1: WEATHER GUESSER & FLYABILITY -->
+  <div id="weather-tab" class="tab-content active">
+    <div class="grid-2">
+      <!-- Input Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Flight Weather Conditions</span>
+          <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="resetWeatherForm()">Reset</button>
+        </div>
+
+        <div class="form-group">
+          <label>Select Takeoff Spot (Mazandaran / North Iran)</label>
+          <select id="takeoff-site" onchange="applySitePreset()">
+            <option value="mahdirajeh">Mahdirajeh (Behshahr) - 450m ASL, Faces North/Caspian</option>
+            <option value="sarket">Sarket (Sari) - 350m ASL, Faces N/NE</option>
+            <option value="ramsar">Ramsar Coastal Ridge - 300m ASL, Faces N/NW</option>
+            <option value="kelardasht">Kelardasht Alpine Basin - 1250m ASL, Mountain thermals</option>
+            <option value="custom">Custom Site / Training Field</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Avg Wind Speed (km/h)</label>
+            <input type="number" id="wind-speed" value="14" min="0" max="60" oninput="calculateFlyability()">
+          </div>
+          <div class="form-group">
+            <label>Max Gust (km/h)</label>
+            <input type="number" id="wind-gust" value="18" min="0" max="80" oninput="calculateFlyability()">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Wind Direction</label>
+            <select id="wind-dir" onchange="calculateFlyability()">
+              <option value="0" selected>North (0°) - Direct Sea Breeze</option>
+              <option value="45">North-East (45°)</option>
+              <option value="90">East (90°)</option>
+              <option value="135">South-East (135°)</option>
+              <option value="180">South (180°) - Tailwind / Mountain Rotor</option>
+              <option value="225">South-West (225°)</option>
+              <option value="270">West (270°)</option>
+              <option value="315">North-West (315°)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cloud Base / Ceiling (m)</label>
+            <input type="number" id="cloud-base" value="1200" min="100" max="5000" oninput="calculateFlyability()">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Precipitation / Atmosphere</label>
+            <select id="weather-condition" onchange="calculateFlyability()">
+              <option value="clear" selected>Clear / Scattered Clouds</option>
+              <option value="humid">High Humidity / Haze</option>
+              <option value="fog">Fog / Low Stratus on Mountain</option>
+              <option value="rain">Rain / Drizzle</option>
+              <option value="storm">Thunderstorm / Cumulonimbus (CB)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pilot Training Level</label>
+            <select id="pilot-level" onchange="calculateFlyability()">
+              <option value="student" selected>Student / Ground Handling & Early Flights</option>
+              <option value="novice">Novice Pilot (P2 Solo)</option>
+              <option value="intermediate">Intermediate (P3 Soaring/Thermic)</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn" onclick="calculateFlyability()">Evaluate Weather & Training Decision</button>
+      </div>
+
+      <!-- Decision & Evaluation Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Flight Decision Engine</span>
+          <span style="font-size: 0.8rem; color: var(--accent);" id="site-facing-info">Site Faces: North (0°)</span>
+        </div>
+
+        <div class="compass-container">
+          <div class="compass">
+            <div class="compass-mark n">N</div>
+            <div class="compass-mark s">S</div>
+            <div class="compass-mark e">E</div>
+            <div class="compass-mark w">W</div>
+            <div class="compass-needle" id="compass-needle" style="transform: rotate(0deg);"></div>
+          </div>
+        </div>
+        <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Wind Arrow pointing toward current direction</p>
+
+        <div id="decision-box" class="weather-decision-box status-go">
+          <div class="status-badge" id="status-badge">OPTIMAL FLYING</div>
+          <div class="status-title" id="status-title">Ideal Training Window</div>
+          <div class="status-desc" id="status-desc">Smooth sea breeze aligned with the slope. Great for ridge soaring and beginner high flights.</div>
+
+          <div class="status-parameters">
+            <div class="param-item">
+              <span>Wind Speed</span>
+              <strong id="disp-speed">14 km/h</strong>
+            </div>
+            <div class="param-item">
+              <span>Gust Margin</span>
+              <strong id="disp-gust">4 km/h delta (Safe)</strong>
+            </div>
+            <div class="param-item">
+              <span>Slope Alignment</span>
+              <strong id="disp-alignment">Direct Headwind</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; padding: 14px; background: #0c182a; border-radius: 8px; border: 1px solid var(--card-border);">
+          <div style="font-weight: 700; color: var(--accent); margin-bottom: 6px; font-size: 0.9rem;">RECOMMENDED TRAINING TODAY:</div>
+          <p id="rec-activity" style="font-size: 0.85rem; color: var(--text-muted);">
+            High flight solo practice, spot landing approach drills, or dynamic soaring along the ridge line.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: 6-MONTH TRAINING ROADMAP -->
+  <div id="roadmap-tab" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>6-Month Training Syllabus (Zero to Independent Pilot)</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Self-Paced Progression Checklist</span>
+      </div>
+
+      <div class="overall-progress">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 600; font-size: 0.9rem;">Overall Training Progress:</span>
+          <span id="progress-percent" style="font-weight: 700; color: var(--accent);">0% Completed</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Month 1 -->
+      <div class="month-card">
+        <div class="month-header" onclick="toggleMonth('m1')">
+          <div class="month-header-left">
+            <span class="month-badge">Month 1</span>
+            <div>
+              <div class="month-title">Ground Handling & Kiting Fundamentals</div>
+              <div class="month-sub">Mastering the glider on flat terrain before touching mountain launches</div>
+            </div>
+          </div>
+          <span style="color: var(--accent);">▼</span>
+        </div>
+        <div class="month-body" id="m1-body">
+          <div class="task-item">
+            <input type="checkbox" id="task-1" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Canopy Anatomy & Equipment Care</strong>
+              <p>Learn lines classification (A, B, C, brakes), speed system, harness adjustments, reserve pin check, and proper packing.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-2" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Forward Launch Inflation & Running</strong>
+              <p>Building the wall, smooth torso forward drive, keeping glider centered overhead on gentle 5-10 km/h breezes.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-3" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Reverse Launch & Active Kiting (15+ Hours)</strong>
+              <p>Turning around in harness, controlling canopy with A-risers and brakes in 12-20 km/h wind without looking up constantly.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-4" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Kill Canopy Technique & Strong Wind Safety</strong>
+              <p>Emergency de-powering using C/D risers or rear brake wrap to prevent getting dragged in gusty conditions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month 2 -->
+      <div class="month-card">
+        <div class="month-header" onclick="toggleMonth('m2')">
+          <div class="month-header-left">
+            <span class="month-badge">Month 2</span>
+            <div>
+              <div class="month-title">Slope Hops & First Solo Mountain Flights</div>
+              <div class="month-sub">Transition to training hill, radio communication, and high takeoffs</div>
+            </div>
+          </div>
+          <span style="color: var(--accent);">▼</span>
+        </div>
+        <div class="month-body" id="m2-body">
+          <div class="task-item">
+            <input type="checkbox" id="task-5" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Training Slope Hops (20-50m elevation)</strong>
+              <p>Low glides down grassy slopes to master smooth flare timing, landing upright on your feet, and commitment to the run.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-6" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Tandem Instructional Flights with Certified Instructor</strong>
+              <p>Dual flights to experience high altitude sensations, airspeed control, and landing pattern from 400m+.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-7" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>First High Solo Flights (e.g. Mahdirajeh or Sarket)</strong>
+              <p>First solo launches under radio supervision. Clean launch run, smooth glide in calm morning/afternoon air, safe landing.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-8" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Landing Pattern (Box / DBF: Downwind, Base, Final)</strong>
+              <p>Judging wind cone, setting up accurate altitude depletion, and landing into wind within 20m of target.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month 3 -->
+      <div class="month-card">
+        <div class="month-header" onclick="toggleMonth('m3')">
+          <div class="month-header-left">
+            <span class="month-badge">Month 3</span>
+            <div>
+              <div class="month-title">Dynamic Ridge Soaring & Airspace Mastery</div>
+              <div class="month-sub">Staying aloft in continuous coastal/mountain sea breeze lift</div>
+            </div>
+          </div>
+          <span style="color: var(--accent);">▼</span>
+        </div>
+        <div class="month-body" id="m3-body">
+          <div class="task-item">
+            <input type="checkbox" id="task-9" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Figure-8 Ridge Turns & Lift Exploration</strong>
+              <p>Turning away from the mountain ridge at all times; maintaining minimum safe airspeed while flying parallel to slope.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-10" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Air Traffic & Right-of-Way Rules</strong>
+              <p>Ridge with right shoulder has right of way; passing protocols; distance preservation from other paragliders.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-11" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Extended Flight Duration (1+ Hour Continuous Flight)</strong>
+              <p>Sustaining flight in steady 15-18 km/h Caspian onshore wind at sites like Mahdirajeh without touching down prematurely.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" id="task-12" onchange="updateProgress()">
+            <div class="task-text">
+              <strong>Speed System (Speed Bar) Operation</strong>
+              <p>Engaging 30% and 50% speed bar to penetrate stronger headwind layers safely without pitching forward.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month 4 -->
+      <div class="month-card">
+        <div class="month-header" onclick="toggleMonth('m4')">
+          <div class="month-header-left">
+            <span class="month-badge">Month 4</span>
+            <div>
+              <div class="month-title">Active Piloting & Rapid Descent Maneuvers</div>
+              <div class="month-sub">Pitch dampening, roll stability, and tactical altitude loss</div>
+            </div>
+          </div>
+          <div class="month-body" id="m4-body">
+            <div class="task-item">
+              <input type="checkbox" id="task-13" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Pitch & Surge Control (Active Piloting)</strong>
+                <p>Catching surges immediately when entering/leaving thermals or gusts to prevent frontal collapses.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-14" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Big Ears Maneuver (Ears + Speed Bar)</strong>
+                <p>Pulling outer A-lines to reduce sail area and increase sink rate to 3-4 m/s while maintaining directional steering with weight shift.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-15" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Mild Asymmetric Collapse Recovery Training</strong>
+                <p>Simulating 30% asymmetric collapse, counter-weight-shifting to maintain heading, and gently pumping clear.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-16" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Top Landing Intro & Touch-and-Go Drills</strong>
+                <p>Learning how to approach the takeoff ridge back at altitude in gentle, smooth conditions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month 5 -->
+      <div class="month-card">
+        <div class="month-header" onclick="toggleMonth('m5')">
+          <div class="month-header-left">
+            <span class="month-badge">Month 5</span>
+            <div>
+              <div class="month-title">Thermal Soaring & Introduction to Cross-Country (XC)</div>
+              <div class="month-sub">Catching rising warm air currents and reading cloud bases</div>
+            </div>
+          </div>
+          <div class="month-body" id="m5-body">
+            <div class="task-item">
+              <input type="checkbox" id="task-17" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Variometer & Flight Instrument Competency</strong>
+                <p>Interpreting audio tones, averaging climb rate, and understanding glide ratios to potential landing zones.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-18" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Centering Thermal Cores</strong>
+                <p>Tightening turns on strong beep, flattening bank angle when sink begins; drifting with the wind gradient.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-19" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Cross-Country (XC) Flight Plan Preparation</strong>
+                <p>Analyzing terrain, identifying power lines, restricted airspace, and pre-planning safe out-landing fields.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-20" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Alpine Flying Experience (e.g. Kelardasht or Damavand Foothills)</strong>
+                <p>Adapting to higher density altitude, stronger mid-day thermal turbulence, and valley wind patterns.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month 6 -->
+      <div class="month-card">
+        <div class="month-header" onclick="toggleMonth('m6')">
+          <div class="month-header-left">
+            <span class="month-badge">Month 6</span>
+            <div>
+              <div class="month-title">SIV Safety Clinic, Certification & Independence</div>
+              <div class="month-sub">Over-water safety training, formal pilot license test, and autonomous flying</div>
+            </div>
+          </div>
+          <div class="month-body" id="m6-body">
+            <div class="task-item">
+              <input type="checkbox" id="task-21" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Over-Water SIV Course (Simulation d'Incidents en Vol)</strong>
+                <p>Full stalls, dynamic spin recovery, aggressive spirals, frontal collapses, and reserve toss deployment over lake/sea.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-22" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Independent Site & Weather Risk Assessment</strong>
+                <p>Making go/no-go calls completely autonomously based on microclimate, local cloud formations, and wind gradient.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-23" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Theory Exam & Aerodynamics Written Test</strong>
+                <p>Passing aviation meteorology, micro-meteorology, airspace regulations, and flight mechanics test.</p>
+              </div>
+            </div>
+            <div class="task-item">
+              <input type="checkbox" id="task-24" onchange="updateProgress()">
+              <div class="task-text">
+                <strong>Final Practical Checkride & License Award (P2/P3 / APPI)</strong>
+                <p>Accurate spot landing, demonstrated active flying in moderate conditions, and solo license issuance.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 3: SEASONS IN MAZANDARAN -->
+  <div id="season-tab" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Mazandaran & North Iran 6-Month Seasonal Strategy</span>
+        <span style="font-size: 0.85rem; color: var(--accent);">Pick the Best 6-Month Block</span>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+        To finish your 6-month training program with minimal weather cancellations, aligning your training with the northern climatic calendar is critical.
+      </p>
+
+      <table class="season-table">
+        <thead>
+          <tr>
+            <th>Iranian Month (Solar)</th>
+            <th>Gregorian Period</th>
+            <th>Flyable Days / Mo</th>
+            <th>Dominant Weather & Wind</th>
+            <th>Recommended Training Focus</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Farvardin - Ordibehesht</strong></td>
+            <td>Late Mar - May</td>
+            <td><span class="pill pill-yellow">12 - 16 Days</span></td>
+            <td>Spring transition. Moderate rain fronts, rising thermals, changing winds.</td>
+            <td>Ground handling, simulator practice, calm morning slope hops.</td>
+          </tr>
+          <tr>
+            <td><strong>Khordad - Tir</strong></td>
+            <td>Late May - July</td>
+            <td><span class="pill pill-green">20 - 24 Days</span></td>
+            <td>Stable onshore sea breezes (12-18 km/h). Consistent afternoon ridge lift.</td>
+            <td>Ridge soaring, high flights, long duration flights at Mahdirajeh.</td>
+          </tr>
+          <tr>
+            <td><strong>Mordad - Shahrivar</strong></td>
+            <td>Late July - Sept</td>
+            <td><span class="pill pill-green">22 - 25 Days</span></td>
+            <td>Peak warm weather. High humidity; strong afternoon thermals in mountains.</td>
+            <td>Active piloting, high altitude soaring in Kelardasht, thermaling.</td>
+          </tr>
+          <tr>
+            <td><strong>Mehr - Aban</strong></td>
+            <td>Late Sept - Nov</td>
+            <td><span class="pill pill-yellow">14 - 18 Days</span></td>
+            <td>Crisp, clear autumn days. Lower humidity, shorter daylight, occasional fronts.</td>
+            <td>Spot landing precision, SIV clinic over water, license practical tests.</td>
+          </tr>
+          <tr>
+            <td><strong>Azar - Dey - Bahman</strong></td>
+            <td>Dec - Feb</td>
+            <td><span class="pill pill-red">4 - 8 Days</span></td>
+            <td>Heavy rainfall, wet landing pastures, low cloud ceilings, snow on ridges.</td>
+            <td>Ground theory, reserve repack, harness adjustments, indoor simulator.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 24px; padding: 16px; background: #11223b; border-radius: 8px; border-left: 4px solid var(--accent);">
+        <strong style="color: #fff; font-size: 1rem;">Optimal 6-Month Training Windows:</strong>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 6px;">
+          <strong>Best Choice:</strong> Start in <em>April (Ordibehesht)</em> and conclude in <em>October (Mehr)</em>. This spans the entire dry, thermic, and sea-breeze season with virtually no long winter interruptions.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: FLIGHT TRAINING LOG -->
+  <div id="log-tab" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Pilot Training Logbook</span>
+        <button class="btn" style="width: auto; padding: 6px 16px; font-size: 0.85rem;" onclick="toggleLogForm()">+ Add New Session</button>
+      </div>
+
+      <!-- Add Log Form (Hidden by default) -->
+      <div id="log-form-container" style="display: none; background: #0c1829; padding: 20px; border-radius: 10px; margin-bottom: 24px; border: 1px solid var(--card-border);">
+        <div style="font-weight: 700; margin-bottom: 12px; color: var(--accent);">Log New Training Flight / Kiting Session</div>
+        <div class="row">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="log-date">
+          </div>
+          <div class="form-group">
+            <label>Location / Site</label>
+            <input type="text" id="log-site" placeholder="e.g. Mahdirajeh or Sari Practice Field">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Activity Type</label>
+            <select id="log-type">
+              <option value="Ground Handling">Ground Handling / Kiting</option>
+              <option value="Slope Hop">Training Slope Hop</option>
+              <option value="Solo High Flight">Solo High Flight</option>
+              <option value="Ridge Soaring">Ridge Soaring</option>
+              <option value="Thermic / XC">Thermic / XC Flight</option>
+              <option value="Tandem Training">Tandem Instruction</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration (Minutes)</label>
+            <input type="number" id="log-duration" placeholder="e.g. 45" min="1">
+          </div>
+          <div class="form-group">
+            <label>Wind (km/h & Dir)</label>
+            <input type="text" id="log-wind" placeholder="e.g. 14 km/h N">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Skills Practiced & Instructor Notes</label>
+          <textarea id="log-notes" rows="2" placeholder="e.g. Big ears with speed bar, spot landing inside 10m marker..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn" onclick="saveFlightLog()">Save to Logbook</button>
+          <button class="btn btn-secondary" onclick="toggleLogForm()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Stats Summary -->
+      <div class="row" style="margin-bottom: 16px;">
+        <div style="background: #0f1f33; padding: 14px; border-radius: 8px; text-align: center; border: 1px solid var(--card-border);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Sessions</div>
+          <div id="stat-sessions" style="font-size: 1.5rem; font-weight: 700; color: #fff;">0</div>
+        </div>
+        <div style="background: #0f1f33; padding: 14px; border-radius: 8px; text-align: center; border: 1px solid var(--card-border);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Airtime (Mins)</div>
+          <div id="stat-airtime" style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">0</div>
+        </div>
+        <div style="background: #0f1f33; padding: 14px; border-radius: 8px; text-align: center; border: 1px solid var(--card-border);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Kiting Hours</div>
+          <div id="stat-kiting" style="font-size: 1.5rem; font-weight: 700; color: var(--success);">0</div>
+        </div>
+      </div>
+
+      <div class="log-table-container">
+        <table class="log-table" id="log-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Location</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>Wind</th>
+              <th>Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+        <div id="log-empty" class="empty-state">No flight sessions logged yet. Record your ground handling and flights above!</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 5: PRE-FLIGHT 5-POINT CHECKLIST -->
+  <div id="checklist-tab" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Pre-Flight 5-Point Safety Check</span>
+        <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="resetChecklist()">Uncheck All</button>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+        Perform this sacred routine on the takeoff launch pad before pulling up the canopy on every single flight.
+      </p>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="chk-1">
+        <div>
+          <strong style="color: #fff; display: block;">1. Helmet & Harness Leg/Chest Buckles</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Helmet chinstrap buckled tight; leg loops double-checked; main chest strap secure with T-lock engaged.</span>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="chk-2">
+        <div>
+          <strong style="color: #fff; display: block;">2. Carabiners & Speed System</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Main carabiners fully closed and locked (no cross-loading). Speed bar lines run cleanly outside risers.</span>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="chk-3">
+        <div>
+          <strong style="color: #fff; display: block;">3. Reserve Parachute Container & Handle</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Deployment handle seated firmly, safety pin in position, container zip closed, bridle attached properly.</span>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="chk-4">
+        <div>
+          <strong style="color: #fff; display: block;">4. Canopy Layout, Lines & Risers</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Canopy open in horseshoe arc, leading edge clear of sticks/stones; A-risers clean on top; brake lines clear of wraps.</span>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="chk-5">
+        <div>
+          <strong style="color: #fff; display: block;">5. Wind Direction & Airspace Clearance</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Wind speed within envelope; wind direct onto takeoff; no other pilots in landing zone or launch corridor. Clear for launch!</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Presets for Mazandaran Sites
+  const sitePresets = {
+    mahdirajeh: { name: "Mahdirajeh (Behshahr)", facing: 0, facingName: "North (0°)", idealMin: 12, idealMax: 20, maxGust: 24 },
+    sarket: { name: "Sarket (Sari)", facing: 20, facingName: "North-NorthEast (20°)", idealMin: 10, idealMax: 18, maxGust: 22 },
+    ramsar: { name: "Ramsar Coastal Ridge", facing: 340, facingName: "North-NorthWest (340°)", idealMin: 10, idealMax: 17, maxGust: 20 },
+    kelardasht: { name: "Kelardasht Alpine", facing: 0, facingName: "All-Valley / Valley Breeze", idealMin: 8, idealMax: 16, maxGust: 20 },
+    custom: { name: "Custom Training Ground", facing: 0, facingName: "Variable", idealMin: 10, idealMax: 20, maxGust: 24 }
+  };
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function applySitePreset() {
+    const siteKey = document.getElementById('takeoff-site').value;
+    const preset = sitePresets[siteKey];
+    document.getElementById('site-facing-info').innerText = "Site Launch Faces: " + preset.facingName;
+    calculateFlyability();
+  }
+
+  function calculateFlyability() {
+    const siteKey = document.getElementById('takeoff-site').value;
+    const preset = sitePresets[siteKey];
+    const speed = parseFloat(document.getElementById('wind-speed').value) || 0;
+    const gust = parseFloat(document.getElementById('wind-gust').value) || 0;
+    const dir = parseInt(document.getElementById('wind-dir').value);
+    const ceiling = parseFloat(document.getElementById('cloud-base').value) || 1000;
+    const weather = document.getElementById('weather-condition').value;
+    const level = document.getElementById('pilot-level').value;
+
+    // Update compass needle
+    const needle = document.getElementById('compass-needle');
+    if (needle) {
+      needle.style.transform = `rotate(${dir}deg)`;
+    }
+
+    const gustDelta = Math.max(0, gust - speed);
+    document.getElementById('disp-speed').innerText = speed + " km/h";
+    document.getElementById('disp-gust').innerText = gustDelta + " km/h delta (" + (gustDelta > 8 ? "Turbulent" : "Smooth") + ")";
+
+    // Calculate angle difference between wind direction and site facing
+    let angleDiff = Math.abs(dir - preset.facing);
+    if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+    let alignmentText = "Headwind (" + angleDiff + "° off)";
+    if (angleDiff > 60 && angleDiff <= 110) alignmentText = "Crosswind (" + angleDiff + "°)";
+    else if (angleDiff > 110) alignmentText = "Dangerous Tailwind (" + angleDiff + "°)";
+    document.getElementById('disp-alignment').innerText = alignmentText;
+
+    const box = document.getElementById('decision-box');
+    const badge = document.getElementById('status-badge');
+    const title = document.getElementById('status-title');
+    const desc = document.getElementById('status-desc');
+    const rec = document.getElementById('rec-activity');
+
+    // Rule-based decision logic
+    // 1. Extreme Weather Disqualifiers
+    if (weather === 'storm') {
+      setBoxStatus('status-danger', 'RED: NO-GO / THUNDERSTORM', 'Cumulonimbus / Thunderstorm Hazard',
+        'Severe danger of gust fronts, microbursts, lightning, and intense cloud suck. Ground all equipment immediately!',
+        'Stay indoors. Do not take out gliders. Focus on theory and meteorology study.');
+      return;
+    }
+    if (weather === 'rain') {
+      setBoxStatus('status-danger', 'RED: NO-GO / RAIN', 'Wet Wings Stall Hazard',
+        'Raindrops soak the porous fabric, drastically altering aerodynamics and causing deep stall or parachute mode on takeoff.',
+        'No flying. Perform indoor harness adjustments or line check.');
+      return;
+    }
+    if (weather === 'fog' || ceiling < 400) {
+      setBoxStatus('status-danger', 'RED: NO-GO / ZERO VISIBILITY', 'Cloud Base Below Takeoff',
+        'Mountain slope or takeoff shrouded in fog/stratus. Flying without ground reference is strictly illegal and dangerous.',
+        'Wait for sun to burn off the fog or practice flat field kiting below cloud level.');
+      return;
+    }
+
+    // 2. Wind Direction Disqualifiers
+    if (angleDiff > 90) {
+      setBoxStatus('status-danger', 'RED: DANGEROUS TAILWIND', 'Wind Blowing Over Ridge from Behind',
+        'Tailwind on launch causes severe lee-side rotor turbulence, sink, and impossible takeoff runs.',
+        'No mountain launch. If wind is moderate on a flat field with open unobstructed fetch, flat ground kiting may be possible.');
+      return;
+    }
+
+    // 3. Wind Speed Disqualifiers
+    if (speed > 25 || gust > 30) {
+      setBoxStatus('status-danger', 'RED: BLOWN OUT', 'Wind Exceeds Safe Trim Speed',
+        'Glider trim speed is around 36-38 km/h. At 25+ km/h wind, backward drift into trees or power lines is highly probable.',
+        'Strictly grounded for flying. Experienced pilots can do heavy ground handling with helmet in open fields with caution.');
+      return;
+    }
+
+    // 4. Gust Factor Disqualifier
+    if (gustDelta > 10) {
+      setBoxStatus('status-caution', 'YELLOW: GUSTY / TURBULENT', 'High Gust Differential (>10 km/h)',
+        'Atmosphere is punchy and thermally active or mechanical wind sheer is present. Risk of asymmetric collapse.',
+        level === 'student' 
+          ? 'Ground handling in open meadow with an instructor. Do not launch solo high flights.'
+          : 'Experienced pilots only with active piloting skills. Student flights suspended.');
+      return;
+    }
+
+    // 5. Crosswind Warning
+    if (angleDiff > 45) {
+      setBoxStatus('status-caution', 'YELLOW: STRONG CROSSWIND', 'Crosswind Component Exceeds 45°',
+        'Glider will tend to turn into the slope or drag across takeoff. Launch window requires careful diagonal alignment.',
+        'Practice directional launch inflations on flat ground or wait for sea breeze to square up.');
+      return;
+    }
+
+    // 6. Very Light Wind
+    if (speed < 6) {
+      setBoxStatus('status-caution', 'YELLOW: NIL / WEAK WIND', 'Calm Air / Weak Lift',
+        'Forward launch with aggressive, committed sprint required. No ridge soaring lift available; flight will be pure top-to-bottom glide (sled ride).',
+        'Excellent for beginner forward launch runs, spot landing practice, and calm morning student high flights.');
+      return;
+    }
+
+    // 7. Optimal Flyable Window
+    if (speed >= 10 && speed <= 20 && angleDiff <= 35 && gustDelta <= 8) {
+      setBoxStatus('status-go', 'GREEN: OPTIMAL FLYING', 'Ideal Training & Soaring Window',
+        'Smooth laminar sea breeze aligned straight with the ridge. Consistent dynamic lift with safe penetration speed.',
+        level === 'student'
+          ? 'Perfect for radio-supervised solo high flights, smooth ridge traverses, and approach drills.'
+          : 'Outstanding conditions for 1-2 hour dynamic ridge soaring, top landings, and precision approaches.');
+      return;
+    }
+
+    // Default Fallback
+    setBoxStatus('status-caution', 'YELLOW: MARGINAL CONDITIONS', 'Caution Required',
+      'Conditions are flyable with vigilance. Monitor wind trend and keep local landing fields in clear glide cone.',
+      'Ground handling or supervised flights depending on instructor judgment.');
+  }
+
+  function setBoxStatus(statusClass, badgeText, titleText, descText, recText) {
+    const box = document.getElementById('decision-box');
+    box.className = 'weather-decision-box ' + statusClass;
+    document.getElementById('status-badge').innerText = badgeText;
+    document.getElementById('status-title').innerText = titleText;
+    document.getElementById('status-desc').innerText = descText;
+    document.getElementById('rec-activity').innerText = recText;
+  }
+
+  function resetWeatherForm() {
+    document.getElementById('wind-speed').value = 14;
+    document.getElementById('wind-gust').value = 18;
+    document.getElementById('wind-dir').value = "0";
+    document.getElementById('cloud-base').value = 1200;
+    document.getElementById('weather-condition').value = "clear";
+    document.getElementById('pilot-level').value = "student";
+    calculateFlyability();
+  }
+
+  // 6-Month Roadmap Logic
+  function toggleMonth(mId) {
+    const body = document.getElementById(mId + '-body');
+    body.style.display = (body.style.display === 'none' || body.style.display === '') ? 'block' : 'none';
+  }
+
+  function updateProgress() {
+    const checkboxes = document.querySelectorAll('#roadmap-tab input[type="checkbox"]');
+    let checkedCount = 0;
+    checkboxes.forEach(cb => {
+      if (cb.checked) checkedCount++;
+    });
+    const percent = Math.round((checkedCount / checkboxes.length) * 100);
+    document.getElementById('progress-percent').innerText = percent + "% Completed (" + checkedCount + "/" + checkboxes.length + " Milestones)";
+    document.getElementById('progress-fill').style.width = percent + "%";
+
+    // Save to localStorage
+    const states = Array.from(checkboxes).map(cb => cb.checked);
+    localStorage.setItem('paragliding_roadmap_state', JSON.stringify(states));
+  }
+
+  function loadProgress() {
+    const saved = localStorage.getItem('paragliding_roadmap_state');
+    if (saved) {
+      try {
+        const states = JSON.parse(saved);
+        const checkboxes = document.querySelectorAll('#roadmap-tab input[type="checkbox"]');
+        checkboxes.forEach((cb, index) => {
+          if (states[index] !== undefined) cb.checked = states[index];
+        });
+      } catch (e) {}
+    }
+    updateProgress();
+  }
+
+  // Flight Log Logic
+  let flightLogs = [];
+
+  function loadLogs() {
+    const saved = localStorage.getItem('paragliding_flight_logs');
+    if (saved) {
+      try {
+        flightLogs = JSON.parse(saved);
+      } catch (e) {
+        flightLogs = [];
+      }
+    }
+    renderLogs();
+  }
+
+  function renderLogs() {
+    const tbody = document.getElementById('log-body');
+    const emptyState = document.getElementById('log-empty');
+    tbody.innerHTML = '';
+
+    if (flightLogs.length === 0) {
+      emptyState.style.display = 'block';
+    } else {
+      emptyState.style.display = 'none';
+      let totalMinutes = 0;
+      let kitingMinutes = 0;
+
+      flightLogs.forEach((log, index) => {
+        const duration = parseInt(log.duration) || 0;
+        totalMinutes += duration;
+        if (log.type === 'Ground Handling') kitingMinutes += duration;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${log.date || '-'}</td>
+          <td><strong>${log.site || '-'}</strong></td>
+          <td><span class="pill pill-green">${log.type}</span></td>
+          <td>${log.duration} min</td>
+          <td>${log.wind || '-'}</td>
+          <td>${log.notes || '-'}</td>
+          <td><button style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem;" onclick="deleteLog(${index})">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('stat-sessions').innerText = flightLogs.length;
+      document.getElementById('stat-airtime').innerText = totalMinutes;
+      document.getElementById('stat-kiting').innerText = (kitingMinutes / 60).toFixed(1) + " hrs";
+    }
+  }
+
+  function toggleLogForm() {
+    const container = document.getElementById('log-form-container');
+    container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'block' : 'none';
+    if (container.style.display === 'block') {
+      document.getElementById('log-date').valueAsDate = new Date();
+    }
+  }
+
+  function saveFlightLog() {
+    const date = document.getElementById('log-date').value;
+    const site = document.getElementById('log-site').value;
+    const type = document.getElementById('log-type').value;
+    const duration = document.getElementById('log-duration').value;
+    const wind = document.getElementById('log-wind').value;
+    const notes = document.getElementById('log-notes').value;
+
+    if (!duration || duration <= 0) {
+      alert('Please specify the session duration in minutes.');
+      return;
+    }
+
+    flightLogs.unshift({ date, site, type, duration, wind, notes });
+    localStorage.setItem('paragliding_flight_logs', JSON.stringify(flightLogs));
+    renderLogs();
+
+    // Clear form & close
+    document.getElementById('log-site').value = '';
+    document.getElementById('log-duration').value = '';
+    document.getElementById('log-wind').value = '';
+    document.getElementById('log-notes').value = '';
+    toggleLogForm();
+  }
+
+  function deleteLog(index) {
+    if (confirm('Delete this logged session?')) {
+      flightLogs.splice(index, 1);
+      localStorage.setItem('paragliding_flight_logs', JSON.stringify(flightLogs));
+      renderLogs();
+    }
+  }
+
+  function resetChecklist() {
+    document.querySelectorAll('#checklist-tab input[type="checkbox"]').forEach(cb => cb.checked = false);
+  }
+
+  // Initialize
+  window.onload = function() {
+    applySitePreset();
+    loadProgress();
+    loadLogs();
+  };
+</script>
+
+</body>
+</html>
