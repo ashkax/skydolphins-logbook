@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>پنل مدیریت مربی - تیم پاراگلایدر Sky Dolphins</title>
+  <style>
+    :root {
+      --bg: #070e18;
+      --card-bg: #0f1c2e;
+      --card-border: #1a2f4c;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #38bdf8;
+      --gold: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --danger: #ef4444;
+      --nav-height: 64px;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 24px + env(safe-area-inset-bottom));
+      user-select: none;
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(7, 14, 24, 0.97);
+      backdrop-filter: blur(14px);
+      padding: calc(12px + env(safe-area-inset-top)) 16px 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-title-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .badge-instructor {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-link-student {
+      background: #15253d;
+      border: 1px solid var(--card-border);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .container {
+      padding: 16px;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stat-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 4px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Student Card */
+    .student-card {
+      background: #0d192a;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .student-card:hover { border-color: var(--accent); }
+
+    .student-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .student-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .badge-pending {
+      background: var(--gold);
+      color: #000;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* Flight Card */
+    .flight-card {
+      background: #0d192a;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .flight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .flight-pilot-name {
+      font-size: 0.85rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .flight-site {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .flight-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0;
+    }
+
+    .tag {
+      background: #08111e;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .tag-duration {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .btn-xcontest-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+
+    .instructor-action-box {
+      background: #08111e;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-verify {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+    .modal-overlay.active { display: flex; align-items: flex-start; justify-content: center; }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 550px;
+      padding: 20px;
+      margin: 20px auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #08111e;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.92rem;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: rgba(10, 21, 37, 0.97);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 40;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 8px;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-icon { font-size: 1.25rem; margin-bottom: 2px; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Instructor App Header -->
+  <header class="app-header">
+    <div class="app-title-area">
+      <div class="app-title">APPI COACH PORTAL</div>
+      <span class="badge-instructor">مربی (نوید)</span>
+    </div>
+    <div class="header-actions">
+      <a href="solo.html" class="btn-link-student">
+        <span>📱 نمای هنرجویان</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- TAB 1: TEAM OVERVIEW & ROSTER -->
+    <div id="screen-roster" class="screen active">
+      <div class="stats-grid">
+        <div class="stat-pill">
+          <div class="stat-num" id="stat-students-count">0</div>
+          <div class="stat-label">هنرجویان تیم</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num" id="stat-total-flights">0</div>
+          <div class="stat-label">کل پروازها</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num" id="stat-pending-count" style="color: var(--gold);">0</div>
+          <div class="stat-label">منتظر تایید</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num" id="stat-total-hours">0h</div>
+          <div class="stat-label">ساعت پرواز تیم</div>
+        </div>
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div style="display: flex; gap: 8px; flex-direction: column; margin-bottom: 16px;">
+        <div class="card" style="border: 1px dashed var(--accent); background: linear-gradient(135deg, #091a2e, #0e2b4d); margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">ثبت سریع پرواز با فایل IGC / XContest</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">آپلود ترک برای خود یا هر یک از هنرجویان تیم</div>
+            </div>
+            <button class="btn-submit" onclick="document.getElementById('inst-quick-igc').click()" style="width: auto; margin-top: 0; padding: 8px 14px; font-size: 0.8rem;">
+              📂 انتخاب IGC
+            </button>
+            <input type="file" id="inst-quick-igc" accept=".igc,.IGC" style="display: none;" onchange="handleInstQuickIgc(event)">
+          </div>
+        </div>
+
+        <div class="card" style="border: 1px dashed #f59e0b; background: linear-gradient(135deg, #161c28, #231d10); margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 800; color: #f59e0b; font-size: 0.95rem;">📥 دریافت لاگ‌بوک ارسالی هنرجو (JSON)</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">ورود مستقیم لاگ‌بوک هنرجو جهت بررسی و تایید رسمی توسط مربی</div>
+            </div>
+            <button class="btn-submit" onclick="document.getElementById('inst-student-json-file').click()" style="width: auto; margin-top: 0; padding: 8px 14px; font-size: 0.8rem; background: #f59e0b; color: #000; font-weight: 800;">
+              📥 انتخاب فایل
+            </button>
+            <input type="file" id="inst-student-json-file" accept=".json" style="display: none;" onchange="handleImportStudentLogbook(event)">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>لیست خلبانان و هنرجویان تیم Sky Dolphins</span>
+          <button class="btn-submit" onclick="openAddStudentModal()" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 0.8rem;">+ افزودن هنرجو</button>
+        </div>
+        <div id="students-list-container"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PENDING APPROVALS -->
+    <div id="screen-pending" class="screen">
+      <div class="card-title" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>پروازهای ارسالی در انتظار تایید مربی نوید</span>
+          <span id="pending-badge-top" style="background: var(--gold); color: #000; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 10px;">0</span>
+        </div>
+        <button id="btn-verify-all" onclick="verifyAllPendingFlights()" style="display: none; background: #10b981; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+          ✓ تایید یکجای همه
+        </button>
+      </div>
+
+      <div id="pending-flights-container"></div>
+
+      <div id="empty-pending" class="empty-state" style="display: none;">
+        <div style="font-size: 2.5rem; margin-bottom: 8px;">✅</div>
+        <h3 style="color: #fff; margin-bottom: 4px;">تمامی پروازها بررسی و تایید شده‌اند</h3>
+        <p style="font-size: 0.85rem;">پرواز جدیدی از طرف هنرجویان ارسال نشده است.</p>
+      </div>
+    </div>
+
+    <!-- TAB 3: TOOLS & TEAM EXPORT -->
+    <div id="screen-tools" class="screen">
+      <div class="card">
+        <div class="card-title">
+          <span>خروجی رسمی لاگ‌بوک کل تیم (Excel / CSV)</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          دانلود یکجای تمامی پروازهای تاییدشده و ثبت‌شده کل هنرجویان به صورت فایل اکسل جهت ارسال به فدراسیون یا آرشیو باشگاه.
+        </p>
+        <button class="btn-submit" onclick="exportTeamCSV()" style="margin-top: 0; background: #0284c7;">دانلود فایل اکسل / CSV کل پروازهای تیم</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>پشتیبان‌گیری کامل و بازیابی تیم (JSON)</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-submit" onclick="backupTeamJSON()" style="margin-top: 0; background: #1a2f4c;">دانلود بکاپ کامل تیم</button>
+          <button class="btn-submit" onclick="document.getElementById('restore-file').click()" style="margin-top: 0; background: #1a2f4c;">بازیابی بکاپ</button>
+          <input type="file" id="restore-file" style="display: none;" accept=".json" onchange="restoreTeamJSON(event)">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: ADD STUDENT -->
+  <div id="modal-add-student" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="font-size: 1.1rem; color: #fff;">افزودن هنرجو به تیم</h2>
+        <button style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;" onclick="closeAddStudentModal()">&times;</button>
+      </div>
+      <form onsubmit="handleAddStudentSubmit(event)">
+        <div class="form-group">
+          <label>نام و نام خانوادگی</label>
+          <input type="text" id="add-stud-name" placeholder="مثلاً علیرضا رضایی" required>
+        </div>
+        <div class="row" style="display: flex; gap: 8px;">
+          <div class="form-group" style="flex: 1;">
+            <label>شماره گواهینامه APPI ID</label>
+            <input type="text" id="add-stud-appi" placeholder="مثلاً 24890">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>سطح APPI</label>
+            <select id="add-stud-level">
+              <option value="Open Sky Pilot">Open Sky Pilot</option>
+              <option value="Adventure Pilot">Adventure Pilot</option>
+              <option value="APPI Pilot">APPI Pilot (مستقل)</option>
+              <option value="Advanced Pilot">Advanced Pilot</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>شماره همراه</label>
+          <input type="tel" id="add-stud-phone" placeholder="0912...">
+        </div>
+        <button type="submit" class="btn-submit">ثبت در لیست تیم</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('roster', this)">
+      <span class="nav-icon">👥</span>
+      <span>تیم و هنرجویان</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('pending', this)">
+      <span class="nav-icon">⏳</span>
+      <span>تایید پروازها</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('tools', this)">
+      <span class="nav-icon">📊</span>
+      <span>خروجی و گزارش</span>
+    </button>
+  </nav>
+
+  <script>
+    let students = [];
+    let allFlights = [];
+
+    // Iranian Sites for IGC reverse-matching
+    const iranianSites = [
+      { name: 'مهدیرجه (بهشهر - مازندران)', lat: 36.685, lon: 53.535, radiusKm: 15 },
+      { name: 'سرکت (ساری - مازندران)', lat: 36.435, lon: 53.155, radiusKm: 12 },
+      { name: 'ویسه (ساری - مازندران)', lat: 36.410, lon: 53.180, radiusKm: 10 },
+      { name: 'رامسر (ایلمیلی - مازندران)', lat: 36.905, lon: 50.645, radiusKm: 12 },
+      { name: 'کلاردشت (مازندران)', lat: 36.505, lon: 51.155, radiusKm: 18 },
+      { name: 'شهران (تهران)', lat: 35.790, lon: 51.295, radiusKm: 10 },
+      { name: 'آبعلی (تهران)', lat: 35.745, lon: 51.955, radiusKm: 12 },
+      { name: 'دماوند (چنارشرق)', lat: 35.710, lon: 52.095, radiusKm: 12 },
+      { name: 'گردنه رخ (چهارمحال و بختیاری)', lat: 32.350, lon: 51.050, radiusKm: 18 },
+      { name: 'مینودشت (ترسه - گلستان)', lat: 37.150, lon: 55.450, radiusKm: 18 }
+    ];
+
+    function haversineDistKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('screen-' + tabId).classList.add('active');
+      if (el) el.classList.add('active');
+    }
+
+    function loadData() {
+      // Load shared database
+      const rawStudents = localStorage.getItem('paragliding_team_students') || localStorage.getItem('official_appi_students');
+      if (rawStudents) {
+        try { students = JSON.parse(rawStudents); } catch(e) { students = []; }
+      }
+      const rawFlights = localStorage.getItem('paragliding_team_flights') || localStorage.getItem('official_appi_flights_data');
+      if (rawFlights) {
+        try { allFlights = JSON.parse(rawFlights); } catch(e) { allFlights = []; }
+      }
+      renderView();
+    }
+
+    function saveData() {
+      localStorage.setItem('paragliding_team_students', JSON.stringify(students));
+      localStorage.setItem('paragliding_team_flights', JSON.stringify(allFlights));
+      // Sync with solo logbook keys
+      localStorage.setItem('official_appi_flights_data', JSON.stringify(allFlights));
+    }
+
+    function renderView() {
+      // Stats
+      document.getElementById('stat-students-count').innerText = students.length;
+      document.getElementById('stat-total-flights').innerText = allFlights.length;
+      const pendingFlights = allFlights.filter(f => f.status === 'Pending' || f.validated === 'Pending');
+      document.getElementById('stat-pending-count').innerText = pendingFlights.length;
+      document.getElementById('pending-badge-top').innerText = pendingFlights.length;
+      const verifyAllBtn = document.getElementById('btn-verify-all');
+      if (verifyAllBtn) {
+        verifyAllBtn.style.display = pendingFlights.length > 0 ? 'inline-block' : 'none';
+      }
+      const totalMinutes = allFlights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
+      document.getElementById('stat-total-hours').innerText = (totalMinutes / 60).toFixed(1) + "h";
+
+      // Render Roster
+      const rosterContainer = document.getElementById('students-list-container');
+      rosterContainer.innerHTML = '';
+      if (students.length === 0) {
+        rosterContainer.innerHTML = `
+          <div class="empty-state" style="padding: 24px;">
+            <div style="font-size: 2rem; margin-bottom: 6px;">👥</div>
+            <div style="color: #fff; font-weight: 700;">هنوز هنرجویی به تیم اضافه نشده است</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">برای افزودن، دکمه «+ افزودن هنرجو» در بالا را بزنید.</div>
+          </div>
+        `;
+      } else {
+        students.forEach(s => {
+          const sFlights = allFlights.filter(f => f.studentId === s.id || f.studentName === s.name);
+          const sPending = sFlights.filter(f => f.status === 'Pending' || f.validated === 'Pending').length;
+          const sMinutes = sFlights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
+
+          const card = document.createElement('div');
+          card.className = 'student-card';
+          card.innerHTML = `
+            <div class="student-header">
+              <div>
+                <span class="student-name">${s.name}</span>
+                <span style="font-size: 0.75rem; color: var(--accent); margin-right: 8px;">APPI: ${s.appiId || '-'}</span>
+              </div>
+              ${sPending > 0 ? `<span class="badge-pending">${sPending} پرواز در انتظار تایید</span>` : `<span style="font-size: 0.75rem; color: var(--success);">✓ به‌روز</span>`}
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">سطح: <strong>${s.level}</strong> | همراه: ${s.phone || '-'}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);">
+              <span>✈️ ${sFlights.length} پرواز | ⏱️ ${(sMinutes/60).toFixed(1)} ساعت هوایی</span>
+              <button onclick="deleteStudent('${s.id}', '${s.name}', event)" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; cursor: pointer;">حذف هنرجو</button>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+              ${sPending > 0 ? `<button onclick="switchTab('pending', document.querySelectorAll('.nav-item')[1])" style="background: var(--gold); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🔍 بررسی ${sPending} پرواز جدید</button>` : ''}
+              <button onclick="exportStudentLogbook('${s.name}')" style="background: #172c47; border: 1px solid var(--card-border); color: #38bdf8; padding: 5px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                ⬇️ دریافت فایل لاگ‌بوک تاییدشده هنرجو (JSON)
+              </button>
+            </div>
+          `;
+          rosterContainer.appendChild(card);
+        });
+      }
+
+      // Render Pending Flights
+      const pendingContainer = document.getElementById('pending-flights-container');
+      const emptyPending = document.getElementById('empty-pending');
+      pendingContainer.innerHTML = '';
+
+      if (pendingFlights.length === 0) {
+        emptyPending.style.display = 'block';
+      } else {
+        emptyPending.style.display = 'none';
+        pendingFlights.forEach(f => {
+          const card = document.createElement('div');
+          card.className = 'flight-card';
+          card.innerHTML = `
+            <div class="flight-header">
+              <span class="flight-pilot-name">خلبان: ${f.studentName || f.pilot || 'هنرجو'}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">${f.date}</span>
+            </div>
+            <div class="flight-site">${f.site} (پرواز شماره #${f.num || 1})</div>
+            <div class="flight-tags">
+              <span class="tag tag-duration">⏱️ ${f.duration} دقیقه</span>
+              <span class="tag">${f.type || 'پرواز آزاد'}</span>
+              <span class="tag">🪂 ${f.glider || 'بال استاندارد'}</span>
+              ${f.alt ? `<span class="tag">⛰️ ${f.alt}m</span>` : ''}
+              ${f.distance ? `<span class="tag">📏 ${f.distance} km</span>` : ''}
+              ${f.wind ? `<span class="tag">💨 ${f.wind}</span>` : ''}
+            </div>
+            ${f.exercise ? `<div style="font-size: 0.8rem; color: #38bdf8; margin-bottom: 4px;">🎯 تمرین: ${f.exercise}</div>` : ''}
+            ${f.notes ? `<div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 8px;">📝 توضیحات: ${f.notes}</div>` : ''}
+            ${f.xcontestUrl ? `
+              <div style="margin-bottom: 8px;">
+                <a href="${f.xcontestUrl}" target="_blank" rel="noopener noreferrer" class="btn-xcontest-link">
+                  🗺️ مشاهده و تحلیل ۳بعدی پرواز در XContest
+                </a>
+              </div>
+            ` : ''}
+
+            <div class="instructor-action-box">
+              <div style="font-weight: 700; color: var(--accent); font-size: 0.8rem; margin-bottom: 4px;">ثبت تاییدیه و نظر مربی (نوید):</div>
+              <input type="text" id="note-${f.id}" placeholder="نکته آموزشی یا نظر فنی مربی برای هنرجو (اختیاری)..." style="margin-bottom: 8px;">
+              <button class="btn-verify" onclick="verifyFlight(${f.id})">
+                ✓ تایید و امضای رسمی این پرواز (نوید - مربی APPI)
+              </button>
+            </div>
+          `;
+          pendingContainer.appendChild(card);
+        });
+      }
+    }
+
+    function verifyFlight(flightId) {
+      const noteInput = document.getElementById('note-' + flightId);
+      const note = noteInput ? noteInput.value : '';
+
+      const flight = allFlights.find(f => f.id === flightId);
+      if (flight) {
+        flight.status = 'Verified';
+        flight.validated = 'Verified';
+        flight.verifiedBy = 'نوید (مربی APPI)';
+        flight.verifiedAt = new Date().toISOString().slice(0, 10);
+        flight.instructorNote = note;
+        saveData();
+        alert('پرواز خلبان ' + (flight.studentName || flight.pilot) + ' با موفقیت تایید و امضاء شد.');
+        renderView();
+      }
+    }
+
+    function deleteStudent(id, name, e) {
+      if (e) e.stopPropagation();
+      if (confirm('آیا از حذف هنرجو "' + name + '" از تیم اطمینان دارید؟')) {
+        students = students.filter(s => s.id !== id);
+        saveData();
+        renderView();
+      }
+    }
+
+    function openAddStudentModal() {
+      document.getElementById('modal-add-student').classList.add('active');
+    }
+    function closeAddStudentModal() {
+      document.getElementById('modal-add-student').classList.remove('active');
+    }
+
+    function handleAddStudentSubmit(e) {
+      e.preventDefault();
+      const s = {
+        id: 'stud_' + Date.now(),
+        name: document.getElementById('add-stud-name').value.trim(),
+        appiId: document.getElementById('add-stud-appi').value.trim(),
+        level: document.getElementById('add-stud-level').value,
+        phone: document.getElementById('add-stud-phone').value.trim()
+      };
+      students.push(s);
+      saveData();
+      closeAddStudentModal();
+      document.getElementById('add-stud-name').value = '';
+      document.getElementById('add-stud-appi').value = '';
+      document.getElementById('add-stud-phone').value = '';
+      renderView();
+      alert('هنرجو با موفقیت به تیم اضافه شد.');
+    }
+
+    function handleInstQuickIgc(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const lines = e.target.result.split('\n');
+          let date = '', pilot = 'نوید (مربی)', glider = '', bRecords = [];
+          for (let line of lines) {
+            line = line.trim();
+            if (line.startsWith('HFDTE')) {
+              const m = line.match(/(\d{2})(\d{2})(\d{2})/);
+              if (m) {
+                let yr = parseInt(m[3]);
+                date = `${yr < 70 ? 2000 + yr : 1900 + yr}-${m[2]}-${m[1]}`;
+              }
+            } else if (line.includes('PLTPILOT:') || line.includes('PLTPILOTINCHARGE:')) {
+              pilot = line.split(':')[1]?.trim() || pilot;
+            } else if (line.includes('GLIDERTYPE:') || line.includes('GTYGLIDERTYPE:')) {
+              glider = line.split(':')[1]?.trim() || glider;
+            } else if (line.startsWith('B') && line.length >= 35) {
+              const hh = parseInt(line.substring(1, 3));
+              const mm = parseInt(line.substring(3, 5));
+              const ss = parseInt(line.substring(5, 7));
+              const latDeg = parseInt(line.substring(7, 9));
+              const latMin = parseInt(line.substring(9, 14)) / 1000.0;
+              let lat = latDeg + latMin / 60.0;
+              if (line[14] === 'S') lat = -lat;
+              const lonDeg = parseInt(line.substring(15, 18));
+              const lonMin = parseInt(line.substring(18, 23)) / 1000.0;
+              let lon = lonDeg + lonMin / 60.0;
+              if (line[23] === 'W') lon = -lon;
+              const gpsAlt = parseInt(line.substring(30, 35)) || 0;
+              bRecords.push({ time_s: hh * 3600 + mm * 60 + ss, lat, lon, alt: gpsAlt });
+            }
+          }
+
+          let durationMins = 30;
+          let maxAlt = 500;
+          let matchedSite = 'مهدیرجه (بهشهر - مازندران)';
+          let distKm = '';
+
+          if (bRecords.length >= 2) {
+            durationMins = Math.max(1, Math.round((bRecords[bRecords.length - 1].time_s - bRecords[0].time_s) / 60));
+            maxAlt = Math.max(...bRecords.map(r => r.alt));
+            const toLat = bRecords[0].lat, toLon = bRecords[0].lon;
+            let maxDist = 0;
+            for (let r of bRecords) {
+              const d = haversineDistKm(toLat, toLon, r.lat, r.lon);
+              if (d > maxDist) maxDist = d;
+            }
+            distKm = maxDist > 0.5 ? maxDist.toFixed(1) : '';
+            for (let s of iranianSites) {
+              if (haversineDistKm(toLat, toLon, s.lat, s.lon) <= s.radiusKm) {
+                matchedSite = s.name;
+                break;
+              }
+            }
+          }
+
+          const newFlight = {
+            id: Date.now(),
+            studentName: pilot,
+            num: allFlights.length + 1,
+            date: date || new Date().toISOString().slice(0, 10),
+            site: matchedSite,
+            type: parseFloat(distKm) >= 15 ? 'XC' : 'Ridge Soaring',
+            duration: durationMins,
+            glider: glider || 'بال پاراگلایدر',
+            alt: maxAlt,
+            distance: distKm,
+            notes: `ترک IGC (${file.name})`,
+            status: 'Verified',
+            verifiedBy: 'نوید (مربی APPI)',
+            verifiedAt: new Date().toISOString().slice(0, 10),
+            instructorNote: 'تایید خودکار مربی با آپلود فایل ترک'
+          };
+
+          allFlights.unshift(newFlight);
+          saveData();
+          renderView();
+          alert('پرواز خلبان ' + pilot + ' با موفقیت از فایل IGC استخراج و ثبت شد!');
+        } catch(err) {
+          alert('خطا در خواندن فایل IGC: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportTeamCSV() {
+      if (allFlights.length === 0) {
+        alert('پروازی برای دانلود وجود ندارد.');
+        return;
+      }
+      let csv = "Flight,Pilot,Date,Site,Type,Duration_Mins,Glider,Max_Alt,Distance_Km,Notes,Status,Verified_By\n";
+      allFlights.forEach(f => {
+        csv += `"${f.num}","${f.studentName||f.pilot||''}","${f.date}","${f.site}","${f.type||''}","${f.duration}","${f.glider||''}","${f.alt||''}","${f.distance||''}","${(f.notes||'').replace(/"/g, '""')}","${f.status||f.validated||''}","${f.verifiedBy||''}"\n`;
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `skydolphins_team_logbook_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function backupTeamJSON() {
+      const data = { students, allFlights, exportDate: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `skydolphins_team_backup_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function restoreTeamJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const d = JSON.parse(e.target.result);
+          if (d.students) students = d.students;
+          if (d.allFlights) allFlights = d.allFlights;
+          saveData();
+          renderView();
+          alert('اطلاعات تیم با موفقیت بازیابی شد.');
+        } catch(err) {
+          alert('خطا در فایل پشتیبان.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function verifyAllPendingFlights() {
+      const pendingFlights = allFlights.filter(f => f.status === 'Pending' || f.validated === 'Pending');
+      if (pendingFlights.length === 0) return;
+      if (confirm('آیا از تایید و امضای رسمی ' + pendingFlights.length + ' پرواز مطمئن هستید؟')) {
+        const today = new Date().toISOString().slice(0, 10);
+        pendingFlights.forEach(f => {
+          f.status = 'Verified';
+          f.validated = 'Verified';
+          f.verifiedBy = 'نوید (مربی APPI)';
+          f.verifiedAt = today;
+          if (!f.instructorNote) f.instructorNote = 'تایید رسمی مربی نوید';
+        });
+        saveData();
+        renderView();
+        alert('تمامی ' + pendingFlights.length + ' پرواز با موفقیت تایید و امضاء شدند.');
+      }
+    }
+
+    function handleImportStudentLogbook(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          let pilotName = (data.pilot && data.pilot.name) ? data.pilot.name.trim() : '';
+          const appiId = (data.pilot && data.pilot.appiId) ? data.pilot.appiId.trim() : '';
+          const phone = (data.pilot && data.pilot.phone) ? data.pilot.phone.trim() : '';
+          
+          if (!pilotName) {
+            pilotName = prompt('نام هنرجو را وارد کنید:', file.name.replace('.json', '').replace('appi_logbook_backup_', '')) || 'هنرجوی جدید';
+          }
+
+          let student = students.find(s => s.name === pilotName || (appiId && s.appiId === appiId));
+          if (!student) {
+            student = {
+              id: 'stud_' + Date.now(),
+              name: pilotName,
+              appiId: appiId || '',
+              level: 'Adventure Pilot',
+              phone: phone || ''
+            };
+            students.push(student);
+          } else {
+            if (appiId && !student.appiId) student.appiId = appiId;
+            if (phone && !student.phone) student.phone = phone;
+          }
+
+          let addedCount = 0;
+          let flightList = data.flights || [];
+          flightList.forEach(f => {
+            const exists = allFlights.some(existing => existing.id === f.id || (existing.studentName === pilotName && existing.date === f.date && existing.num === f.num));
+            if (!exists) {
+              const newFlight = {
+                ...f,
+                id: f.id || (Date.now() + Math.floor(Math.random() * 10000)),
+                studentId: student.id,
+                studentName: pilotName,
+                pilot: pilotName,
+                status: f.validated === 'Verified' ? 'Verified' : 'Pending',
+                validated: f.validated === 'Verified' ? 'Verified' : 'Pending'
+              };
+              allFlights.unshift(newFlight);
+              addedCount++;
+            }
+          });
+
+          saveData();
+          renderView();
+          switchTab('pending', document.querySelectorAll('.nav-item')[1]);
+          alert('لاگ‌بوک خلبان "' + pilotName + '" با موفقیت دریافت شد.\n' + addedCount + ' پرواز به لیست اضافه گردید و آماده تایید است.');
+        } catch(err) {
+          alert('خطا در خواندن فایل لاگ‌بوک هنرجو: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function exportStudentLogbook(studentName) {
+      const studentFlights = allFlights.filter(f => f.studentName === studentName || f.pilot === studentName);
+      const student = students.find(s => s.name === studentName) || { name: studentName };
+      const data = {
+        pilot: { name: student.name, appiId: student.appiId || '', phone: student.phone || '' },
+        flights: studentFlights,
+        verifiedBy: 'نوید (مربی APPI)',
+        exportDate: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `verified_appi_logbook_${student.name}_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    window.onload = function() {
+      loadData();
+    };
+  </script>
+</body>
+</html>

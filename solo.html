@@ -86,6 +86,22 @@
       gap: 8px;
     }
 
+    .btn-coach-portal {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 1px solid #b45309;
+      color: #000;
+      padding: 6px 11px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+    }
+
     .btn-lang {
       background: #1a3252;
       border: 1px solid var(--card-border);
@@ -591,6 +607,9 @@
       <span class="badge-appi">OFFICIAL</span>
     </div>
     <div class="header-actions">
+      <a href="instructor.html" class="btn-coach-portal" title="ورود به پنل مدیریت مربی نوید">
+        <span>👨‍✈️ پنل مربی</span>
+      </a>
       <button class="btn-lang" onclick="toggleLanguage()" id="btn-lang">English</button>
       <button class="btn-quick-log" onclick="openLogModal()">
         <span>+ ثبت پرواز</span>
@@ -899,6 +918,24 @@
           <button class="btn-submit" onclick="backupJSON()" style="margin-top: 0; background: #1a3252;">بکاپ JSON</button>
           <button class="btn-submit" onclick="document.getElementById('import-file').click()" style="margin-top: 0; background: #1a3252;">بازیابی JSON</button>
           <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importJSON(event)">
+        </div>
+      </div>
+
+      <!-- Coach & Team Portal Link -->
+      <div class="card" style="border: 1px solid #f59e0b; background: linear-gradient(135deg, #0e1e33, #1c1f18);">
+        <div class="card-title" style="color: #f59e0b;">
+          <span>👨‍✈️ پنل مربی نوید و باشگاه Sky Dolphins</span>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+          ارتباط با مربی جهت بررسی، تایید رسمی پروازها در سیستم APPI و ثبت در کارنامه باشگاه:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <a href="instructor.html" class="btn-submit" style="text-align: center; text-decoration: none; background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight: 800; margin-top: 0; padding: 10px;">
+            ورود به پنل مدیریت مربی نوید (Coach Portal)
+          </a>
+          <button type="button" class="btn-submit" onclick="copyFlightsSummaryForCoach()" style="background: #1e3a5f; margin-top: 0; padding: 10px; font-size: 0.85rem;">
+            📋 کپی خلاصه پروازها جهت ارسال به مربی در تلگرام
+          </button>
         </div>
       </div>
     </div>
@@ -1345,6 +1382,57 @@
         }
       };
       reader.readAsText(file);
+    }
+
+    function copyFlightsSummaryForCoach() {
+      const pilot = JSON.parse(localStorage.getItem('appi_pilot_profile') || '{}');
+      const pilotName = pilot.name || 'هنرجو';
+      const appiId = pilot.appiId ? `(APPI ID: ${pilot.appiId})` : '';
+
+      if (flights.length === 0) {
+        alert(isFarsi ? 'هنوز پروازی در لاگ‌بوک ثبت نشده است.' : 'No flights logged yet.');
+        return;
+      }
+
+      let summary = `🪂 گزارش پروازهای لاگ‌بوک APPI - تیم Sky Dolphins\n`;
+      summary += `👤 خلبان: ${pilotName} ${appiId}\n`;
+      summary += `📊 تعداد پروازها: ${flights.length}\n`;
+      const totalMinutes = flights.reduce((sum, f) => sum + (parseInt(f.duration) || 0), 0);
+      summary += `⏱️ مجموع ساعت پرواز: ${(totalMinutes / 60).toFixed(1)} ساعت (${totalMinutes} دقیقه)\n\n`;
+      summary += `✈️ لیست آخرین پروازها:\n`;
+
+      flights.slice(0, 10).forEach(f => {
+        summary += `• پرواز #${f.num} | ${f.date} | ${f.site} | ${f.duration}دقیقه | بال: ${f.glider}\n`;
+        if (f.alt && f.alt !== '-') summary += `  ارتفاع: ${f.alt}m`;
+        if (f.distance) summary += ` | مسافت: ${f.distance}km`;
+        if (f.xcontestUrl) summary += `\n  ترک XContest: ${f.xcontestUrl}`;
+        summary += `\n  وضعیت: ${f.validated === 'Verified' ? '✓ تایید شده' : '⏳ در انتظار تایید مربی'}\n\n`;
+      });
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summary).then(() => {
+          alert(isFarsi ? 'خلاصه پروازها کپی شد! می‌توانید در تلگرام برای مربی نوید ارسال کنید.' : 'Flight summary copied! You can paste it to coach in Telegram.');
+        }).catch(() => {
+          fallbackCopyText(summary);
+        });
+      } else {
+        fallbackCopyText(summary);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        alert(isFarsi ? 'خلاصه پروازها کپی شد! می‌توانید در تلگرام برای مربی نوید ارسال کنید.' : 'Flight summary copied!');
+      } catch (err) {
+        alert('متن را دستی کپی نمایید.');
+      }
+      document.body.removeChild(textArea);
     }
 
     window.onload = function() {
