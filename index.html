@@ -496,10 +496,9 @@
       <span id="role-badge" class="badge-role badge-instructor">مربی (نوید)</span>
     </div>
     <div class="header-actions">
-      <div class="cloud-status">
-        <span class="status-dot dot-online" id="cloud-dot"></span>
-        <span id="cloud-label">دیتابیس ابری</span>
-      </div>
+      <button class="btn-quick-log" onclick="openLogModal()" style="font-size: 0.78rem; padding: 6px 10px; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+        <span>⚡ ثبت پرواز / آپلود IGC</span>
+      </button>
       <button class="btn-switch-role" onclick="promptSwitchRole()" id="btn-role">تغییر نقش</button>
     </div>
   </header>
@@ -532,7 +531,10 @@
       <div class="card">
         <div class="card-title">
           <span>لیست خلبانان و هنرجویان تیم</span>
-          <button class="btn-switch-role" onclick="openAddStudentModal()">+ افزودن هنرجو</button>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-switch-role" style="background: #0284c7; color: #fff;" onclick="openLogModal()">⚡ ثبت پرواز / آپلود IGC</button>
+            <button class="btn-switch-role" onclick="openAddStudentModal()">+ افزودن هنرجو</button>
+          </div>
         </div>
         <div id="roster-list">
           <!-- Dynamic student cards -->
@@ -685,6 +687,11 @@
         <button class="close-btn" onclick="closeLogModal()">&times;</button>
       </div>
       <form id="flight-form" onsubmit="handleLogFlightSubmit(event)">
+        <!-- Pilot Selector for Flight -->
+        <div class="form-group" id="f-pilot-select-group" style="background: #0d1e33; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); margin-bottom: 12px;">
+          <label style="color: var(--accent); font-weight: 700;">خلبان این پرواز (Pilot):</label>
+          <select id="f-pilot-select"></select>
+        </div>
         <!-- XContest & IGC Smart Import Card -->
         <div class="xcontest-import-card">
           <div class="xcontest-title">
@@ -1128,14 +1135,30 @@
     }
 
     function openLogModal() {
-      const student = students.find(s => s.id === currentStudentId);
-      if (!student) {
-        alert('لطفاً ابتدا هنرجو را مشخص کنید.');
-        return;
+      // Populate pilot selector dropdown
+      const pilotSelect = document.getElementById('f-pilot-select');
+      if (pilotSelect) {
+        pilotSelect.innerHTML = '';
+        const instOpt = document.createElement('option');
+        instOpt.value = 'inst_navid';
+        instOpt.text = 'نوید (مربی)';
+        pilotSelect.appendChild(instOpt);
+
+        students.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.text = s.name + (s.level ? ' (' + s.level + ')' : '');
+          if (currentRole === 'student' && s.id === currentStudentId) {
+            opt.selected = true;
+          }
+          pilotSelect.appendChild(opt);
+        });
       }
-      const myFlights = allFlights.filter(f => f.studentId === student.id);
-      document.getElementById('f-num').value = myFlights.length + 1;
+
+      document.getElementById('f-num').value = allFlights.length + 1;
       document.getElementById('f-date').valueAsDate = new Date();
+      const banner = document.getElementById('igc-status-banner');
+      if (banner) banner.style.display = 'none';
       document.getElementById('modal-log-flight').classList.add('active');
     }
     function closeLogModal() {
@@ -1144,13 +1167,25 @@
 
     function handleLogFlightSubmit(e) {
       e.preventDefault();
-      const student = students.find(s => s.id === currentStudentId);
-      if (!student) return;
+      const pilotSelect = document.getElementById('f-pilot-select');
+      const selectedId = pilotSelect ? pilotSelect.value : currentStudentId;
+      let pilotName = 'نوید (مربی)';
+      let studentId = selectedId || 'inst_navid';
+
+      if (selectedId === 'inst_navid') {
+        pilotName = 'نوید (مربی)';
+      } else {
+        const student = students.find(s => s.id === selectedId);
+        if (student) {
+          pilotName = student.name;
+          studentId = student.id;
+        }
+      }
 
       const newF = {
         id: Date.now(),
-        studentId: student.id,
-        studentName: student.name,
+        studentId: studentId,
+        studentName: pilotName,
         num: parseInt(document.getElementById('f-num').value) || 1,
         date: document.getElementById('f-date').value,
         site: document.getElementById('f-site').value,
