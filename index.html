@@ -423,6 +423,68 @@
     .nav-icon { font-size: 1.25rem; margin-bottom: 2px; }
 
     .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+
+    /* XContest & IGC Import Styles */
+    .xcontest-import-card {
+      background: linear-gradient(135deg, #0b1a2e, #0d233f);
+      border: 1px dashed var(--accent);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .xcontest-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #fff;
+    }
+    .xcontest-badge {
+      background: #f59e0b;
+      color: #000;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .btn-import-igc {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn-import-igc:hover { background: #0369a1; }
+    .btn-xcontest-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+    .btn-xcontest-link:hover {
+      background: rgba(245, 158, 11, 0.28);
+    }
+
   </style>
 </head>
 <body>
@@ -623,6 +685,28 @@
         <button class="close-btn" onclick="closeLogModal()">&times;</button>
       </div>
       <form id="flight-form" onsubmit="handleLogFlightSubmit(event)">
+        <!-- XContest & IGC Smart Import Card -->
+        <div class="xcontest-import-card">
+          <div class="xcontest-title">
+            <span>⚡ ورود خودکار پرواز از XContest و فایل IGC</span>
+            <span class="xcontest-badge">هوشمند</span>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+            با انتخاب فایل ترک (IGC) خروجی XCTrack یا وارد کردن لینک XContest، تمام اطلاعات پرواز به صورت خودکار در فیلدهای زیر جای‌گذاری می‌شود:
+          </p>
+          <div style="margin-bottom: 8px;">
+            <button type="button" class="btn-import-igc" onclick="document.getElementById('igc-file-input').click()">
+              📂 انتخاب فایل ترک IGC پرواز (XCTrack / XContest)
+            </button>
+            <input type="file" id="igc-file-input" accept=".igc,.IGC" style="display: none;" onchange="handleIgcFileUpload(event)">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 0.7rem;">یا لینک پرواز در سایت XContest (اختیاری)</label>
+            <input type="url" id="f-xcontest" placeholder="https://www.xcontest.org/.../flights/detail:..." oninput="handleXContestUrlChange(this.value)">
+          </div>
+          <div id="igc-status-banner" style="display: none; margin-top: 8px; font-size: 0.78rem; padding: 7px 10px; border-radius: 6px; background: rgba(16,185,129,0.15); border: 1px solid var(--success); color: #34d399;">
+          </div>
+        </div>
         <div class="row">
           <div class="form-group" style="flex: 0.8;">
             <label>شماره پرواز</label>
@@ -670,9 +754,13 @@
             <input type="text" id="f-glider" placeholder="Ozone Mojo (EN-A)">
           </div>
           <div class="form-group">
-            <label>حداکثر ارتفاع / گین (m)</label>
-            <input type="number" id="f-alt" placeholder="مثلاً 550">
+            <label>مسافت XC (km)</label>
+            <input type="number" step="0.1" id="f-distance" placeholder="مثلاً 24.5">
           </div>
+        </div>
+        <div class="form-group">
+          <label>حداکثر ارتفاع / گین (m)</label>
+          <input type="number" id="f-alt" placeholder="مثلاً 550">
         </div>
 
         <div class="form-group">
@@ -909,8 +997,10 @@
               <span class="tag">${f.type}</span>
               <span class="tag">🪂 ${f.glider}</span>
               ${f.alt ? `<span class="tag">⛰️ ${f.alt}m</span>` : ''}
+              ${f.distance ? `<span class="tag">📏 ${f.distance} km</span>` : ''}
               ${f.wind ? `<span class="tag">💨 ${f.wind}</span>` : ''}
             </div>
+            ${f.xcontestUrl ? `<div><a href="${f.xcontestUrl}" target="_blank" rel="noopener noreferrer" class="btn-xcontest-link">🗺️ مشاهده ترک ۳بعدی در XContest</a></div>` : ''}
             <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px;">🎯 تمرین: ${f.exercise || 'ثبت نشده'}</div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">📝 توضیحات: ${f.notes || '-'}</div>
 
@@ -990,10 +1080,13 @@
               <span class="tag tag-duration">⏱️ ${f.duration} دقیقه</span>
               <span class="tag">${f.type}</span>
               <span class="tag">🪂 ${f.glider}</span>
+              ${f.alt ? `<span class="tag">⛰️ ${f.alt}m</span>` : ''}
+              ${f.distance ? `<span class="tag">📏 ${f.distance} km</span>` : ''}
               <span class="tag ${f.status === 'Verified' ? 'tag-verified' : 'tag-pending'}">
                 ${f.status === 'Verified' ? '✓ تایید شده توسط مربی' : '⏳ در انتظار تایید مربی'}
               </span>
             </div>
+            ${f.xcontestUrl ? `<div><a href="${f.xcontestUrl}" target="_blank" rel="noopener noreferrer" class="btn-xcontest-link">🗺️ مشاهده ترک ۳بعدی در XContest</a></div>` : ''}
             ${f.exercise ? `<div style="font-size: 0.8rem; color: #38bdf8; margin-top: 4px;">🎯 تمرین: ${f.exercise}</div>` : ''}
             ${f.notes ? `<div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">📝 ${f.notes}</div>` : ''}
             ${f.instructorNote ? `
@@ -1065,9 +1158,11 @@
         duration: parseInt(document.getElementById('f-duration').value) || 0,
         glider: document.getElementById('f-glider').value || 'Standard Wing',
         alt: document.getElementById('f-alt').value || '',
+        distance: document.getElementById('f-distance')?.value || '',
         wind: document.getElementById('f-wind').value || '',
         exercise: document.getElementById('f-exercise').value || '',
         notes: document.getElementById('f-notes').value || '',
+        xcontestUrl: document.getElementById('f-xcontest')?.value || '',
         status: 'Pending',
         instructorNote: ''
       };
@@ -1134,6 +1229,182 @@
       if (savedClub) document.getElementById('cfg-club-id').value = savedClub;
       renderApp();
     };
+
+    // Iranian Paragliding Sites GPS coordinates for auto-detection
+    const iranianSites = [
+      { name: 'مهدیرجه (بهشهر - مازندران)', lat: 36.685, lon: 53.535, radiusKm: 15 },
+      { name: 'سرکت (ساری - مازندران)', lat: 36.435, lon: 53.155, radiusKm: 12 },
+      { name: 'ویسه (ساری - مازندران)', lat: 36.410, lon: 53.180, radiusKm: 10 },
+      { name: 'رامسر (ایلمیلی - مازندران)', lat: 36.905, lon: 50.645, radiusKm: 12 },
+      { name: 'کلاردشت (مازندران)', lat: 36.505, lon: 51.155, radiusKm: 18 },
+      { name: 'شهران (تهران)', lat: 35.790, lon: 51.295, radiusKm: 10 },
+      { name: 'آبعلی (تهران)', lat: 35.745, lon: 51.955, radiusKm: 12 },
+      { name: 'دماوند (چنارشرق)', lat: 35.710, lon: 52.095, radiusKm: 12 },
+      { name: 'گردنه رخ (چهارمحال و بختیاری)', lat: 32.350, lon: 51.050, radiusKm: 18 },
+      { name: 'مینودشت (ترسه - گلستان)', lat: 37.150, lon: 55.450, radiusKm: 18 }
+    ];
+
+    function haversineDistKm(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function handleIgcFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        try {
+          const parsed = parseIgcContent(text);
+          applyParsedFlightData(parsed, file.name);
+        } catch(err) {
+          alert('خطا در پردازش فایل IGC: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseIgcContent(text) {
+      const lines = text.split('\n');
+      let date = '';
+      let pilot = '';
+      let glider = '';
+      let bRecords = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('HFDTE')) {
+          // e.g. HFDTE280926 or HFDTE:280926
+          const m = line.match(/(\d{2})(\d{2})(\d{2})/);
+          if (m) {
+            let yr = parseInt(m[3]);
+            let fullYear = yr < 70 ? (2000 + yr) : (1900 + yr);
+            date = `${fullYear}-${m[2]}-${m[1]}`;
+          }
+        } else if (line.includes('PLTPILOT:') || line.includes('PLTPILOTINCHARGE:')) {
+          pilot = line.split(':')[1]?.trim() || '';
+        } else if (line.includes('GLIDERTYPE:') || line.includes('GTYGLIDERTYPE:')) {
+          glider = line.split(':')[1]?.trim() || '';
+        } else if (line.startsWith('B') && line.length >= 35) {
+          const hh = parseInt(line.substring(1, 3));
+          const mm = parseInt(line.substring(3, 5));
+          const ss = parseInt(line.substring(5, 7));
+          const latDeg = parseInt(line.substring(7, 9));
+          const latMin = parseInt(line.substring(9, 14)) / 1000.0;
+          let lat = latDeg + latMin / 60.0;
+          if (line[14] === 'S') lat = -lat;
+          const lonDeg = parseInt(line.substring(15, 18));
+          const lonMin = parseInt(line.substring(18, 23)) / 1000.0;
+          let lon = lonDeg + lonMin / 60.0;
+          if (line[23] === 'W') lon = -lon;
+          const gpsAlt = parseInt(line.substring(30, 35)) || 0;
+          bRecords.push({ time_s: hh * 3600 + mm * 60 + ss, lat, lon, alt: gpsAlt });
+        }
+      }
+
+      if (bRecords.length < 2) {
+        return { date, pilot, glider };
+      }
+
+      let startTime = bRecords[0].time_s;
+      let endTime = bRecords[bRecords.length - 1].time_s;
+      if (endTime < startTime) endTime += 86400; // passed midnight
+      const durationMins = Math.max(1, Math.round((endTime - startTime) / 60));
+
+      let maxAlt = 0;
+      for (let r of bRecords) {
+        if (r.alt > maxAlt) maxAlt = r.alt;
+      }
+
+      // Straight-line max distance in km
+      const toLat = bRecords[0].lat;
+      const toLon = bRecords[0].lon;
+      let maxDist = 0;
+      for (let r of bRecords) {
+        const d = haversineDistKm(toLat, toLon, r.lat, r.lon);
+        if (d > maxDist) maxDist = d;
+      }
+
+      // Match site
+      let matchedSite = '';
+      for (let s of iranianSites) {
+        const dist = haversineDistKm(toLat, toLon, s.lat, s.lon);
+        if (dist <= s.radiusKm) {
+          matchedSite = s.name;
+          break;
+        }
+      }
+      if (!matchedSite) {
+        matchedSite = `مختصات لانچ: ${toLat.toFixed(3)}, ${toLon.toFixed(3)}`;
+      }
+
+      return {
+        date,
+        pilot,
+        glider,
+        durationMins,
+        maxAlt,
+        distanceKm: maxDist > 0.5 ? maxDist.toFixed(1) : '',
+        site: matchedSite,
+        takeoffCoords: `${toLat.toFixed(4)}, ${toLon.toFixed(4)}`
+      };
+    }
+
+    function applyParsedFlightData(parsed, sourceLabel) {
+      if (parsed.date) document.getElementById('f-date').value = parsed.date;
+      if (parsed.site) document.getElementById('f-site').value = parsed.site;
+      if (parsed.durationMins) document.getElementById('f-duration').value = parsed.durationMins;
+      if (parsed.glider) document.getElementById('f-glider').value = parsed.glider;
+      if (parsed.maxAlt) document.getElementById('f-alt').value = parsed.maxAlt;
+      if (parsed.distanceKm && document.getElementById('f-distance')) {
+        document.getElementById('f-distance').value = parsed.distanceKm;
+        if (parseFloat(parsed.distanceKm) >= 15) {
+          document.getElementById('f-type').value = 'XC';
+        }
+      }
+
+      if (parsed.takeoffCoords) {
+        const notes = document.getElementById('f-notes');
+        const info = `ترک IGC (${sourceLabel}) - لانچ: ${parsed.takeoffCoords}`;
+        if (!notes.value.includes('ترک IGC')) {
+          notes.value = notes.value ? notes.value + ' | ' + info : info;
+        }
+      }
+
+      const banner = document.getElementById('igc-status-banner');
+      if (banner) {
+        banner.style.display = 'block';
+        banner.innerHTML = `✓ اطلاعات پرواز با موفقیت از فایل <strong>${sourceLabel}</strong> استخراج شد.<br>سایت شناسایی‌شده: <strong>${parsed.site || '-'}</strong> | مدت: <strong>${parsed.durationMins || '-'} دقیقه</strong> | حداکثر ارتفاع: <strong>${parsed.maxAlt || '-'} متر</strong>`;
+      }
+    }
+
+    function handleXContestUrlChange(url) {
+      if (!url || !url.includes('xcontest.org')) return;
+      // Example URL: https://www.xcontest.org/world/en/flights/detail:username/28.09.2026/09:30
+      const match = url.match(/detail:([^/]+)\/(\d{1,2})[.](\d{1,2})[.](\d{4})/);
+      if (match) {
+        const username = decodeURIComponent(match[1]);
+        const day = match[2].padStart(2, '0');
+        const month = match[3].padStart(2, '0');
+        const year = match[4];
+        document.getElementById('f-date').value = `${year}-${month}-${day}`;
+
+        const banner = document.getElementById('igc-status-banner');
+        if (banner) {
+          banner.style.display = 'block';
+          banner.innerHTML = `✓ لینک XContest برای خلبان <strong>${username}</strong> در تاریخ <strong>${year}/${month}/${day}</strong> متصل شد. لینک ۳بعدی روی پرواز ذخیره می‌شود.`;
+        }
+      }
+    }
+
   </script>
 </body>
 </html>
