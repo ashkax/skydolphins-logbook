@@ -5,16 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>سامانه ابری پرواز و لاگ‌بوک تیم APPI</title>
-  <!-- Firebase SDKs for Real-time Cloud Sync -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <meta name="apple-mobile-web-app-title" content="APPI Logbook">
+  <meta name="theme-color" content="#091424">
+  <title>دفترچه پرواز APPI Paragliding Logbook</title>
   <style>
     :root {
-      --bg: #070e18;
-      --card-bg: #0f1c2e;
-      --card-border: #1a2f4c;
+      --bg: #08111e;
+      --card-bg: #101f35;
+      --card-border: #1a3252;
       --primary: #0284c7;
       --primary-hover: #0369a1;
       --accent: #38bdf8;
@@ -40,17 +38,19 @@
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: calc(var(--nav-height) + 24px + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--nav-height) + 26px + env(safe-area-inset-bottom));
       user-select: none;
+      -webkit-user-select: none;
     }
 
-    /* Header */
+    /* App Header */
     .app-header {
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(7, 14, 24, 0.97);
+      background: rgba(8, 17, 30, 0.96);
       backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       padding: calc(12px + env(safe-area-inset-top)) 16px 12px 16px;
       border-bottom: 1px solid var(--card-border);
       display: flex;
@@ -65,20 +65,20 @@
     }
 
     .app-title {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 800;
       color: #fff;
     }
 
-    .badge-role {
+    .badge-appi {
+      background: #0284c7;
+      color: white;
       font-size: 0.7rem;
       font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
+      padding: 2px 7px;
+      border-radius: 4px;
       letter-spacing: 0.5px;
     }
-    .badge-instructor { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; }
-    .badge-student { background: #0284c7; color: #fff; }
 
     .header-actions {
       display: flex;
@@ -86,8 +86,8 @@
       gap: 8px;
     }
 
-    .btn-switch-role {
-      background: #15253d;
+    .btn-lang {
+      background: #1a3252;
       border: 1px solid var(--card-border);
       color: var(--text);
       padding: 6px 10px;
@@ -97,33 +97,31 @@
       font-weight: 700;
     }
 
-    .cloud-status {
-      display: inline-flex;
+    .btn-quick-log {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 0.7rem;
-      padding: 3px 8px;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--card-border);
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
     }
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-    }
-    .dot-online { background-color: var(--success); box-shadow: 0 0 6px var(--success); }
-    .dot-offline { background-color: var(--gold); }
 
     .container {
       padding: 16px;
-      max-width: 750px;
+      max-width: 650px;
       margin: 0 auto;
     }
 
     .screen {
       display: none;
     }
+
     .screen.active {
       display: block;
       animation: fadeIn 0.2s ease-out;
@@ -132,6 +130,35 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stat-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 4px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
     }
 
     /* Cards */
@@ -153,79 +180,6 @@
       align-items: center;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .stat-pill {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 10px 4px;
-      text-align: center;
-    }
-
-    .stat-num {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .stat-label {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-top: 2px;
-    }
-
-    /* Student Item in Instructor Roster */
-    .student-card {
-      background: #0d192a;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .student-card:hover {
-      border-color: var(--accent);
-    }
-
-    .student-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .student-name {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .student-stats-bar {
-      display: flex;
-      gap: 12px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-
-    .badge-pending-count {
-      background: var(--gold);
-      color: #000;
-      font-weight: 800;
-      font-size: 0.7rem;
-      padding: 2px 7px;
-      border-radius: 10px;
-    }
-
     /* Flight Card */
     .flight-card {
       background: var(--card-bg);
@@ -233,6 +187,7 @@
       border-radius: var(--radius);
       padding: 14px;
       margin-bottom: 12px;
+      position: relative;
     }
 
     .flight-header {
@@ -242,14 +197,19 @@
       margin-bottom: 6px;
     }
 
-    .flight-pilot-name {
+    .flight-num {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .flight-date {
       font-size: 0.8rem;
-      color: var(--gold);
-      font-weight: 700;
+      color: var(--text-muted);
     }
 
     .flight-site {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #fff;
       margin-bottom: 4px;
@@ -259,11 +219,11 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin: 8px 0;
+      margin-top: 8px;
     }
 
     .tag {
-      background: #091322;
+      background: #091424;
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       font-size: 0.72rem;
@@ -279,60 +239,59 @@
       font-weight: 700;
     }
 
-    .tag-verified {
+    .tag-validated {
       background: var(--success-bg);
       border-color: rgba(16, 185, 129, 0.4);
       color: #34d399;
       font-weight: 700;
     }
 
-    .tag-pending {
-      background: rgba(245, 158, 11, 0.15);
-      border-color: rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
-      font-weight: 700;
-    }
-
-    .instructor-box {
-      background: #08111e;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 10px;
-      border: 1px solid var(--card-border);
+    .flight-exercise {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
       font-size: 0.82rem;
+      color: #38bdf8;
     }
 
-    .instructor-box strong {
-      color: var(--accent);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .btn-verify-action {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+    .flight-notes {
+      margin-top: 4px;
       font-size: 0.8rem;
-      font-weight: 700;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 0.75rem;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      padding: 4px 8px;
     }
 
     /* Modal / Form */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.82);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(8px);
       z-index: 100;
       overflow-y: auto;
       padding: 16px 12px calc(40px + env(safe-area-inset-bottom)) 12px;
     }
+
     .modal-overlay.active {
       display: flex;
       align-items: flex-start;
@@ -347,6 +306,7 @@
       max-width: 550px;
       padding: 20px;
       margin: 16px auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
 
     .modal-header {
@@ -358,11 +318,34 @@
       border-bottom: 1px solid var(--card-border);
     }
 
-    .modal-header h2 { font-size: 1.15rem; font-weight: 700; color: #fff; }
-    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+    .modal-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
 
-    .form-group { margin-bottom: 12px; }
-    label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
+
     input, select, textarea {
       width: 100%;
       padding: 10px 12px;
@@ -373,10 +356,19 @@
       font-size: 0.92rem;
       outline: none;
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
-    .row { display: flex; gap: 10px; }
-    .row > div { flex: 1; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
 
     .btn-submit {
       width: 100%;
@@ -391,14 +383,66 @@
       margin-top: 10px;
     }
 
-    /* Bottom Nav */
+    /* Checklist & Tasks */
+    .task-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .task-check:last-child {
+      border-bottom: none;
+    }
+
+    .task-check input[type="checkbox"] {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--primary);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .level-progress-bar {
+      height: 8px;
+      background: #08111e;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0 12px 0;
+    }
+
+    .level-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    /* Speed and Physics Reference Cards */
+    .speed-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    /* Bottom Navigation */
     .bottom-nav {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: calc(var(--nav-height) + env(safe-area-inset-bottom));
       padding-bottom: env(safe-area-inset-bottom);
       background: rgba(10, 21, 37, 0.97);
       backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-top: 1px solid var(--card-border);
       display: flex;
       justify-content: space-around;
@@ -412,17 +456,74 @@
       align-items: center;
       justify-content: center;
       color: var(--text-muted);
+      text-decoration: none;
       font-size: 0.68rem;
       font-weight: 600;
       background: none;
       border: none;
       cursor: pointer;
       padding: 6px 8px;
+      transition: color 0.2s;
     }
-    .nav-item.active { color: var(--accent); }
-    .nav-icon { font-size: 1.25rem; margin-bottom: 2px; }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+      margin-bottom: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    /* B.E.S.A.F.E items */
+    .b-item {
+      background: #091322;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .b-letter {
+      background: #0284c7;
+      color: white;
+      font-weight: 900;
+      font-size: 1.1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .b-content h4 {
+      font-size: 0.9rem;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .b-content p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
 
     /* XContest & IGC Import Styles */
     .xcontest-import-card {
@@ -463,9 +564,7 @@
       justify-content: center;
       gap: 6px;
       width: 100%;
-      transition: background 0.2s;
     }
-    .btn-import-igc:hover { background: #0369a1; }
     .btn-xcontest-link {
       display: inline-flex;
       align-items: center;
@@ -479,238 +578,342 @@
       font-weight: 700;
       text-decoration: none;
       margin-top: 6px;
-      transition: background 0.2s;
-    }
-    .btn-xcontest-link:hover {
-      background: rgba(245, 158, 11, 0.28);
     }
 
   </style>
 </head>
 <body>
 
-  <!-- Top App Header -->
+  <!-- Header -->
   <header class="app-header">
     <div class="app-title-area">
-      <div class="app-title">APPI CLUB CLOUD</div>
-      <span id="role-badge" class="badge-role badge-instructor">مربی (نوید)</span>
+      <div class="app-title">APPI LOGBOOK</div>
+      <span class="badge-appi">OFFICIAL</span>
     </div>
     <div class="header-actions">
-      <button class="btn-quick-log" onclick="openLogModal()" style="font-size: 0.78rem; padding: 6px 10px; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-        <span>⚡ ثبت پرواز / IGC</span>
+      <button class="btn-lang" onclick="toggleLanguage()" id="btn-lang">English</button>
+      <button class="btn-quick-log" onclick="openLogModal()">
+        <span>+ ثبت پرواز</span>
       </button>
-      <button class="btn-switch-role" onclick="promptSwitchRole()" id="btn-role" style="font-size: 0.75rem; padding: 6px 10px; background: #1a2f4c; color: var(--gold); border: 1px solid var(--gold); border-radius: 6px; font-weight: 700; cursor: pointer;">🔐 ورود مربی</button>
     </div>
   </header>
 
+  <!-- Container -->
   <div class="container">
 
-    <!-- ================= INSTRUCTOR SCREENS ================= -->
+    <!-- SCREEN 1: FLIGHT LOGS -->
+    <div id="screen-flights" class="screen active">
 
-    <!-- INSTRUCTOR SCREEN 1: TEAM OVERVIEW & ROSTER -->
-    <div id="screen-inst-roster" class="screen active">
-      <div class="stats-grid">
-        <div class="stat-pill">
-          <div class="stat-num" id="inst-total-students">0</div>
-          <div class="stat-label">هنرجویان تیم</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-num" id="inst-total-flights">0</div>
-          <div class="stat-label">کل پروازهای تیم</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-num" id="inst-pending-count" style="color: var(--gold);">0</div>
-          <div class="stat-label">در انتظار تایید</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-num" id="inst-total-hours">0h</div>
-          <div class="stat-label">ساعت پرواز تیم</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <span>لیست خلبانان و هنرجویان تیم</span>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-switch-role" style="background: #0284c7; color: #fff;" onclick="openLogModal()">⚡ ثبت پرواز / آپلود IGC</button>
-            <button class="btn-switch-role" onclick="openAddStudentModal()">+ افزودن هنرجو</button>
+      <!-- PROMINENT XCONTEST & IGC DIRECT UPLOAD CARD -->
+      <div class="card" style="border: 2px dashed #0284c7; background: linear-gradient(135deg, #091a2e, #0e2b4d); padding: 18px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-size: 1.05rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+            <span>⚡ ورود خودکار پرواز از XContest و فایل IGC</span>
           </div>
+          <span style="background: #f59e0b; color: #000; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 4px;">هوشمند</span>
         </div>
-        <div id="roster-list">
-          <!-- Dynamic student cards -->
-        </div>
-      </div>
-    </div>
-
-    <!-- INSTRUCTOR SCREEN 2: PENDING FLIGHT VERIFICATIONS -->
-    <div id="screen-inst-pending" class="screen">
-      <div class="card-title" style="margin-bottom: 12px;">
-        <span>پروازهای ارسالی در انتظار تایید مربی</span>
-      </div>
-      <div id="pending-flights-list">
-        <!-- Render pending flights with 1-click verify -->
-      </div>
-      <div id="empty-pending" class="empty-state" style="display: none;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">✅</div>
-        <h3 style="color: #fff; margin-bottom: 4px;">همه پروازها تایید شده‌اند</h3>
-        <p style="font-size: 0.85rem;">هیچ پرواز معلقی برای بررسی وجود ندارد.</p>
-      </div>
-    </div>
-
-    <!-- ================= STUDENT / PILOT SCREENS ================= -->
-
-    <!-- STUDENT SCREEN 1: MY FLIGHTS -->
-    <div id="screen-stud-flights" class="screen">
-      <!-- Pilot Identity Bar -->
-      <div class="card" style="background: linear-gradient(135deg, #0f223a, #0a1626); margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-size: 0.75rem; color: var(--accent);">خلبان تیم Sky Dolphins:</div>
-            <div id="disp-student-name" style="font-size: 1.1rem; font-weight: 800; color: #fff;">هنرجو</div>
-          </div>
-          <button class="btn-switch-role" style="font-size: 0.75rem;" onclick="changeStudentIdentity()">ویرایش نام خلبان</button>
-        </div>
-      </div>
-
-      <!-- PROMINENT XCONTEST & IGC DIRECT UPLOAD BOX FOR STUDENTS -->
-      <div class="card" style="border: 2px dashed #0284c7; background: linear-gradient(135deg, #0a1b2e, #0e2744); padding: 18px; text-align: center; margin-bottom: 16px;">
-        <div style="font-size: 1.8rem; margin-bottom: 4px;">⚡ 🪂</div>
-        <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 6px;">ثبت خودکار پرواز از فایل IGC یا XContest</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
-          هنرجویان گرامی: فایل ترک پرواز خود (خروجی XCTrack، Flyskyhy یا دانلود شده از XContest) را انتخاب کنید تا سایت پرواز، مدت، ارتفاع و مسافت در یک ثانیه خودکار پر شده و برای تایید مربی نوید ارسال شود.
+        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+          فایل ترک IGC پروازتان (خروجی نرم‌افزارهای XCTrack، Flyskyhy یا دانلود شده از سایت XContest) را انتخاب کنید تا تاریخ، سایت پرواز، مدت زمان، حداکثر ارتفاع و مسافت به طور خودکار استخراج شده و در لاگ‌بوک ثبت شود:
         </p>
-        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-          <button type="button" class="btn-submit" onclick="document.getElementById('stud-direct-igc').click()" style="margin-top: 0; width: auto; padding: 11px 20px; font-size: 0.9rem; background: linear-gradient(135deg, #0284c7, #0369a1); display: inline-flex; align-items: center; gap: 6px;">
-            📂 انتخاب فایل ترک IGC پرواز
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn-import-igc" onclick="document.getElementById('solo-main-igc-file').click()" style="flex: 1; min-width: 220px; padding: 12px 18px; background: linear-gradient(135deg, #0284c7, #0369a1); font-size: 0.9rem; font-weight: 700;">
+            📂 انتخاب فایل ترک IGC پرواز (XCTrack)
           </button>
-          <button type="button" class="btn-submit" onclick="openLogModal()" style="margin-top: 0; width: auto; padding: 11px 18px; font-size: 0.9rem; background: #172c47; border: 1px solid var(--card-border);">
+          <button type="button" class="btn-import-igc" onclick="openLogModal()" style="flex: 1; min-width: 150px; padding: 12px 16px; background: #172c47; border: 1px solid var(--card-border); font-size: 0.9rem;">
             ✍️ ثبت دستی یا لینک XContest
           </button>
         </div>
-        <input type="file" id="stud-direct-igc" accept=".igc,.IGC" style="display: none;" onchange="handleStudentDirectIgc(event)">
+        <input type="file" id="solo-main-igc-file" accept=".igc,.IGC" style="display: none;" onchange="handleSoloMainIgcUpload(event)">
       </div>
 
+      <!-- Quick Stats -->
       <div class="stats-grid">
         <div class="stat-pill">
-          <div class="stat-num" id="stud-flight-count">0</div>
-          <div class="stat-label">پروازهای من</div>
+          <div class="stat-num" id="stat-total-flights">0</div>
+          <div class="stat-label" data-fa="تعداد پرواز" data-en="Flights">تعداد پرواز</div>
         </div>
         <div class="stat-pill">
-          <div class="stat-num" id="stud-airtime">0h</div>
-          <div class="stat-label">ساعت پرواز</div>
+          <div class="stat-num" id="stat-total-hours">0h</div>
+          <div class="stat-label" data-fa="کل ساعت پرواز" data-en="Total Airtime">کل ساعت پرواز</div>
         </div>
         <div class="stat-pill">
-          <div class="stat-num" id="stud-verified" style="color: var(--success);">0</div>
-          <div class="stat-label">تایید مربی</div>
+          <div class="stat-num" id="stat-soaring-count">0</div>
+          <div class="stat-label" data-fa="پرواز ریج / ترمال" data-en="Soaring/Thermal">پرواز ریج / ترمال</div>
         </div>
         <div class="stat-pill">
-          <div class="stat-num" id="stud-pending" style="color: var(--gold);">0</div>
-          <div class="stat-label">در انتظار</div>
+          <div class="stat-num" id="stat-verified-count">0</div>
+          <div class="stat-label" data-fa="تایید مربی" data-en="Validated">تایید مربی</div>
         </div>
       </div>
 
-      <div id="stud-flights-container"></div>
-      <div id="stud-empty-flights" class="empty-state" style="display: none;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">🪂</div>
-        <h3 style="color: #fff; margin-bottom: 4px;">هنوز پروازی ثبت نکرده‌اید</h3>
-        <p style="font-size: 0.85rem;">دکمه «+ ثبت پرواز جدید» را بزنید تا پرواز به صورت آنلاین برای مربی ارسال شود.</p>
+      <!-- Quick Filter -->
+      <div style="display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px;">
+        <button class="tag tag-duration" style="cursor: pointer;" onclick="filterFlights('all')" data-fa="همه" data-en="All">همه</button>
+        <button class="tag" style="cursor: pointer;" onclick="filterFlights('Ridge Soaring')" data-fa="ریج سورینگ" data-en="Ridge Soaring">ریج سورینگ</button>
+        <button class="tag" style="cursor: pointer;" onclick="filterFlights('Thermal')" data-fa="ترمال" data-en="Thermal">ترمال</button>
+        <button class="tag" style="cursor: pointer;" onclick="filterFlights('Sled Ride')" data-fa="تاپ تو باتم" data-en="Top to Bottom">تاپ تو باتم</button>
+        <button class="tag" style="cursor: pointer;" onclick="filterFlights('XC')" data-fa="مسافت XC" data-en="XC">مسافت XC</button>
+        <button class="tag" style="cursor: pointer;" onclick="filterFlights('Training')" data-fa="تمرینی" data-en="Training">تمرینی</button>
+      </div>
+
+      <!-- Flights List -->
+      <div id="flights-container"></div>
+
+      <div id="empty-flights" class="empty-state" style="display: none;">
+        <div class="empty-icon">🪂</div>
+        <h3 style="color: #fff; margin-bottom: 6px;" data-fa="هنوز پروازی ثبت نشده است" data-en="No Flights Logged Yet">هنوز پروازی ثبت نشده است</h3>
+        <p style="font-size: 0.85rem;" data-fa="دکمه «+ ثبت پرواز» را در بالای صفحه بزنید و پرواز خود را کمتر از ۳۰ ثانیه لاگ کنید!" data-en="Tap '+ Log Flight' above to record your first flight in under 30 seconds!">دکمه «+ ثبت پرواز» را در بالای صفحه بزنید و پرواز خود را کمتر از ۳۰ ثانیه لاگ کنید!</p>
       </div>
     </div>
 
-    <!-- COMMON SCREEN: CLOUD SETTINGS & DATABASE CONFIG -->
-    <div id="screen-cloud-config" class="screen">
+    <!-- SCREEN 2: APPI LEVELS CURRICULUM -->
+    <div id="screen-levels" class="screen">
+      <div style="margin-bottom: 14px;">
+        <h2 style="font-size: 1.15rem; color: #fff;" data-fa="دوره‌ها و مدارک سیستم APPI" data-en="APPI Certification Syllabus">دوره‌ها و مدارک سیستم APPI</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted);" data-fa="سرفصل‌ها و تسک‌های استاندارد جهانی انجمن مربیان و خلبانان APPI" data-en="Official International APPI Pilot Progression Curriculum">سرفصل‌ها و تسک‌های استاندارد جهانی انجمن مربیان و خلبانان APPI</p>
+      </div>
+
+      <!-- Open Sky Pilot -->
       <div class="card">
         <div class="card-title">
-          <span>تنظیمات پایگاه داده آنلاین (Cloud Database)</span>
+          <span>1. OPEN SKY PILOT</span>
+          <span id="p-open-sky" style="font-size: 0.8rem; color: var(--accent);">0%</span>
         </div>
-        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
-          این برنامه مجهز به سیستم همگام‌سازی ابری زنده (Firebase Cloud Firestore) است. داده‌ها همزمان در گوشی ذخیره می‌شوند (آفلاین) و به محض اتصال به اینترنت، با دیتابیس آنلاین هماهنگ می‌گردند.
-        </p>
+        <div class="level-progress-bar"><div id="bar-open-sky" class="level-progress-fill"></div></div>
+        <label class="task-check"><input type="checkbox" id="os-1" onchange="saveAppiProgress()"> <span>بررسی‌های روزانه / چک کردن لوازم / بسته‌بندی</span></label>
+        <label class="task-check"><input type="checkbox" id="os-2" onchange="saveAppiProgress()"> <span>تحلیل آب و هوا، سرعت و جهت باد، سیکل ترمال و سایت</span></label>
+        <label class="task-check"><input type="checkbox" id="os-3" onchange="saveAppiProgress()"> <span>آماده‌سازی تجهیزات، بال U شکل عمود بر باد و چک تک‌تک لاین‌ها</span></label>
+        <label class="task-check"><input type="checkbox" id="os-4" onchange="saveAppiProgress()"> <span>کنترل‌های پیش از پرواز B.E.S.A.F.E</span></label>
+        <label class="task-check"><input type="checkbox" id="os-5" onchange="saveAppiProgress()"> <span>لانچ، شتاب‌گیری و تیک‌آف بدون رها کردن بریک‌ها</span></label>
+        <label class="task-check"><input type="checkbox" id="os-6" onchange="saveAppiProgress()"> <span>پروازهای شیب آموزشی (Slope Hops) و فلر نهایی به‌موقع</span></label>
+      </div>
 
-        <div class="form-group">
-          <label>وضعیت دیتابیس فعلی</label>
-          <div style="background: #08111e; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 0.85rem;">
-            <strong id="db-mode-label" style="color: var(--success);">دیتابیس محلی هوشمند (آماده اتصال ابری)</strong>
+      <!-- Adventure Pilot -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. ADVENTURE PILOT</span>
+          <span id="p-adv" style="font-size: 0.8rem; color: var(--accent);">0%</span>
+        </div>
+        <div class="level-progress-bar"><div id="bar-adv" class="level-progress-fill"></div></div>
+        <label class="task-check"><input type="checkbox" id="adv-1" onchange="saveAppiProgress()"> <span>تحلیل روزانه وضعیت آب و هوا، تغییرات کوتاه‌مدت و تشخیص ابرها</span></label>
+        <label class="task-check"><input type="checkbox" id="adv-2" onchange="saveAppiProgress()"> <span>تسلط در چک نکات ۵ گانه قبل از پرواز</span></label>
+        <label class="task-check"><input type="checkbox" id="adv-3" onchange="saveAppiProgress()"> <span>ریورس لانچ و هدایت بال در باد ۱۲ تا ۱۸ کیلومتر</span></label>
+        <label class="task-check"><input type="checkbox" id="adv-4" onchange="saveAppiProgress()"> <span>تکنیک تقرب فرود استاندار (Downwind, Base, Final)</span></label>
+        <label class="task-check"><input type="checkbox" id="adv-5" onchange="saveAppiProgress()"> <span>تمرین بیگ ایرز (Big Ears) + اسپید بار</span></label>
+        <label class="task-check"><input type="checkbox" id="adv-6" onchange="saveAppiProgress()"> <span>حداقل ۱۵ پرواز بلند ثبت شده در لاگ‌بوک</span></label>
+      </div>
+
+      <!-- APPI Pilot -->
+      <div class="card">
+        <div class="card-title">
+          <span>3. APPI PILOT (خلبان مستقل)</span>
+          <span id="p-pilot" style="font-size: 0.8rem; color: var(--accent);">0%</span>
+        </div>
+        <div class="level-progress-bar"><div id="bar-pilot" class="level-progress-fill"></div></div>
+        <label class="task-check"><input type="checkbox" id="pi-1" onchange="saveAppiProgress()"> <span>تسک‌های تمرین زمینی روی زمین مسطح در باد تا ۱۵ ک/س</span></label>
+        <label class="task-check"><input type="checkbox" id="pi-2" onchange="saveAppiProgress()"> <span>طراحی برنامه پرواز خود و تصمیم ایمن برای پرواز کردن یا نکردن</span></label>
+        <label class="task-check"><input type="checkbox" id="pi-3" onchange="saveAppiProgress()"> <span>حداقل ۳۰ پرواز بلند و توانایی پرواز ریج پیوسته ۱ ساعت</span></label>
+        <label class="task-check"><input type="checkbox" id="pi-4" onchange="saveAppiProgress()"> <span>تمرینات کنترل پیچ و رول و گردش در حداقل سینک</span></label>
+        <label class="task-check"><input type="checkbox" id="pi-5" onchange="saveAppiProgress()"> <span>تایید آزمون تئوری APPI با حداقل ۸۰٪ پاسخ صحیح</span></label>
+        <label class="task-check"><input type="checkbox" id="pi-6" onchange="saveAppiProgress()"> <span>تایید آزمون عملی با دو پرواز و فرود دقیق هدف</span></label>
+      </div>
+
+      <!-- SIV Safety Training -->
+      <div class="card">
+        <div class="card-title">
+          <span>4. SIV SAFETY CLINIC (امنیت پرواز)</span>
+          <span id="p-siv" style="font-size: 0.8rem; color: var(--accent);">0%</span>
+        </div>
+        <div class="level-progress-bar"><div id="bar-siv" class="level-progress-fill"></div></div>
+        <label class="task-check"><input type="checkbox" id="sv-1" onchange="saveAppiProgress()"> <span>پیچ کنترل (دلفین) و مهار سرج شدید بال</span></label>
+        <label class="task-check"><input type="checkbox" id="sv-2" onchange="saveAppiProgress()"> <span>وینگ اور (Roll oscillations)</span></label>
+        <label class="task-check"><input type="checkbox" id="sv-3" onchange="saveAppiProgress()"> <span>جمع‌شدگی متقارن (Frontal collapse) و خروج فوری</span></label>
+        <label class="task-check"><input type="checkbox" id="sv-4" onchange="saveAppiProgress()"> <span>جمع‌شدگی نامتقارن ۵۰٪ و حفظ مستقیم مسیر با شیفت وزن</span></label>
+        <label class="task-check"><input type="checkbox" id="sv-5" onchange="saveAppiProgress()"> <span>بی استال (B-line Stall) و خروج متقارن</span></label>
+        <label class="task-check"><input type="checkbox" id="sv-6" onchange="saveAppiProgress()"> <span>اسپیرال دایو و خروج تدریجی بدون ورود به سرج دوم</span></label>
+        <label class="task-check"><input type="checkbox" id="sv-7" onchange="saveAppiProgress()"> <span>پروسه کشیدن چتر کمکی (Look - Reach - Pull - Throw)</span></label>
+      </div>
+
+      <!-- XC Certification -->
+      <div class="card">
+        <div class="card-title">
+          <span>5. XC CERTIFICATION (پرواز مسافت)</span>
+          <span id="p-xc" style="font-size: 0.8rem; color: var(--accent);">0%</span>
+        </div>
+        <div class="level-progress-bar"><div id="bar-xc" class="level-progress-fill"></div></div>
+        <label class="task-check"><input type="checkbox" id="xc-1" onchange="saveAppiProgress()"> <span>۳ پرواز مسافت به طول حداقل ۲۰ کیلومتر با حداقل ۳ ترنزیشن</span></label>
+        <label class="task-check"><input type="checkbox" id="xc-2" onchange="saveAppiProgress()"> <span>ثبت لاگ ترک GPS یا فایل IGC پروازهای XC</span></label>
+        <label class="task-check"><input type="checkbox" id="xc-3" onchange="saveAppiProgress()"> <span>انتخاب و فرود در لندینگ‌های خارج از سایت (Outlanding)</span></label>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: FLIGHT PROCESS & SAFETY (B.E.S.A.F.E & SPEEDS) -->
+    <div id="screen-safety" class="screen">
+      <div style="margin-bottom: 14px;">
+        <h2 style="font-size: 1.15rem; color: #fff;">پروسه جهانی پرواز APPI و ایمنی</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">چک‌لیست B.E.S.A.F.E، سرعت‌های کلیدی و پروسه پرتاب چتر کمکی</p>
+      </div>
+
+      <!-- B.E.S.A.F.E. Checklist -->
+      <div class="card">
+        <div class="card-title">
+          <span>چک‌لیست قبل از پرواز B.E.S.A.F.E</span>
+          <span style="font-size: 0.75rem; color: var(--accent);">صفحه ۴۸ لاگ‌بوک</span>
+        </div>
+
+        <div class="b-item">
+          <div class="b-letter">B</div>
+          <div class="b-content">
+            <h4>Buckles (بست‌ها و سگک‌ها)</h4>
+            <p>بندهای پا، شکم و سینه با سیستم ضد فراموشی T-lock، کلاه ایمنی و قفل کامل کارابین‌ها</p>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>شناسه تیم / باشگاه (Club ID)</label>
-          <input type="text" id="cfg-club-id" value="SKY_DOLPHINS_IRAN" placeholder="مثلاً SKY_DOLPHINS_IRAN">
+        <div class="b-item">
+          <div class="b-letter">E</div>
+          <div class="b-content">
+            <h4>Equipment (تجهیزات)</h4>
+            <p>پین چتر کمکی در جای خود، گلایدر، لاین‌ها بدون گره، بریک‌ها آزاد، اسپید بار و رادیو روشن</p>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label>کد عبور مربی (Instructor Master PIN)</label>
-          <input type="password" id="cfg-inst-pin" value="1234">
-          <span style="font-size: 0.72rem; color: var(--text-muted);">کد پیش‌فرض: 1234 (می‌توانید تغییر دهید)</span>
+        <div class="b-item">
+          <div class="b-letter">S</div>
+          <div class="b-content">
+            <h4>Stop Line (خط توقف)</h4>
+            <p>تجسم خط توقف در تیک‌آف؛ تکنیک و تصمیم فوری برای انصراف در صورت عدم لانچ تمیز</p>
+          </div>
         </div>
 
-        <button class="btn-submit" onclick="saveCloudConfig()">ذخیره تنظیمات تیم</button>
+        <div class="b-item">
+          <div class="b-letter">A</div>
+          <div class="b-content">
+            <h4>Airflow (جریان هوا و باد)</h4>
+            <p>بررسی جهت باد، شدت وزش، چرخه سیکل‌های ترمال و باد روبه‌رو</p>
+          </div>
+        </div>
+
+        <div class="b-item">
+          <div class="b-letter">F</div>
+          <div class="b-content">
+            <h4>Free Airspace & Runway (باند و هوای خالی)</h4>
+            <p>مسیر دویدن تیک‌آف، مسیر پرواز و فضای جلو بدون ترافیک و خلبان دیگر</p>
+          </div>
+        </div>
+
+        <div class="b-item">
+          <div class="b-letter">E</div>
+          <div class="b-content">
+            <h4>Enjoy Your Flight!</h4>
+            <p>از پروازتان با آرامش و هوشیاری کامل لذت ببرید</p>
+          </div>
+        </div>
       </div>
 
+      <!-- Speeds & Aerodynamics -->
       <div class="card">
         <div class="card-title">
-          <span>پشتیبان‌گیری کامل دیتابیس تیم</span>
+          <span>بازه سرعت‌های آیرودینامیکی (صفحه ۴۹)</span>
         </div>
-        <div class="row">
-          <button class="btn-submit" onclick="exportFullTeamJSON()" style="margin-top: 0; background: #0284c7;">دانلود کل دیتابیس تیم (JSON)</button>
-          <button class="btn-submit" onclick="document.getElementById('import-team-file').click()" style="margin-top: 0; background: #1a2f4c;">بازیابی دیتابیس</button>
-          <input type="file" id="import-team-file" style="display: none;" accept=".json" onchange="importFullTeamJSON(event)">
+        <div style="font-size: 0.85rem; line-height: 1.8;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 0;">
+            <span>بهترین نرخ سرش (Best Glide):</span>
+            <strong style="color: #38bdf8;">~ ۳۹ کیلومتر بر ساعت</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 0;">
+            <span>تریم اسپید (Trim Speed):</span>
+            <strong style="color: #34d399;">~ ۳۷ کیلومتر بر ساعت</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 0;">
+            <span>حداقل سینک (Min Sink):</span>
+            <strong style="color: #fbbf24;">~ ۳۴ کیلومتر بر ساعت</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+            <span>حداقل سرعت امن (Min Speed - واماندگی):</span>
+            <strong style="color: #f87171;">~ ۲۵ کیلومتر بر ساعت (هشدار استال)</strong>
+          </div>
         </div>
+      </div>
+
+      <!-- Reserve Toss Process -->
+      <div class="card">
+        <div class="card-title">
+          <span>پروسه کشیدن و پرتاب چتر کمکی (Reserve Toss)</span>
+        </div>
+        <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6;">
+          <strong>Look - Reach - Pull - Throw - Control:</strong><br>
+          ۱. <strong>نگاه:</strong> دستگیره کمکی را با چشم ببینید.<br>
+          ۲. <strong>گرفتن:</strong> دستگیره را محکم بگیرید.<br>
+          ۳. <strong>کشیدن:</strong> پین را محکم به بیرون بکشید تا پاکت باز شود.<br>
+          ۴. <strong>پرتاب:</strong> با تمام قدرت بسته چتر را به فضای باز (دور از بال) پرتاب کنید.<br>
+          ۵. <strong>مهار بال اصلی:</strong> با کشیدن لاین‌های B یا C بال اصلی را جمع کنید تا از اثر آینه‌ای (Mirror effect) جلوگیری شود.
+        </p>
       </div>
     </div>
 
-  </div>
-
-  <!-- MODAL: ADD STUDENT -->
-  <div id="modal-add-student" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>افزودن خلبان / هنرجوی جدید به تیم</h2>
-        <button class="close-btn" onclick="closeAddStudentModal()">&times;</button>
-      </div>
-      <form onsubmit="handleAddStudentSubmit(event)">
+    <!-- SCREEN 4: PILOT PROFILE & TOOLS -->
+    <div id="screen-profile" class="screen">
+      <div class="card">
+        <div class="card-title">
+          <span>اطلاعات خلبان (صفحه ۲ لاگ‌بوک)</span>
+          <button class="btn-lang" onclick="savePilotProfile()">ذخیره مشخصات</button>
+        </div>
         <div class="form-group">
-          <label>نام و نام خانوادگی خلبان</label>
-          <input type="text" id="new-stud-name" placeholder="مثلاً علی رضایی" required>
+          <label>نام و نام خانوادگی (Pilot Name)</label>
+          <input type="text" id="prof-name" placeholder="نوید / Navid">
         </div>
         <div class="row">
           <div class="form-group">
             <label>شماره گواهینامه APPI ID</label>
-            <input type="text" id="new-stud-appi" placeholder="مثلاً 24890">
+            <input type="text" id="prof-appi-id" placeholder="e.g. 19842">
           </div>
           <div class="form-group">
-            <label>سطح فعلی APPI</label>
-            <select id="new-stud-level">
-              <option value="Open Sky Pilot">Open Sky Pilot (مبتدی)</option>
-              <option value="Adventure Pilot">Adventure Pilot (متوسط)</option>
-              <option value="APPI Pilot">APPI Pilot (مستقل)</option>
-              <option value="Advanced Pilot">Advanced Pilot (پیشرفته)</option>
-            </select>
+            <label>گروه خونی (Blood Type)</label>
+            <input type="text" id="prof-blood" placeholder="e.g. O+">
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label>تلفن همراه</label>
+            <input type="tel" id="prof-phone" placeholder="0912...">
+          </div>
+          <div class="form-group">
+            <label>تماس اضطراری (ICE Contact)</label>
+            <input type="tel" id="prof-ice" placeholder="شماره تماس ضروری">
           </div>
         </div>
         <div class="form-group">
-          <label>تلفن همراه</label>
-          <input type="tel" id="new-stud-phone" placeholder="0912...">
+          <label>پست الکترونیک (Email)</label>
+          <input type="email" id="prof-email" placeholder="email@example.com">
         </div>
-        <button type="submit" class="btn-submit">افزودن به لیست تیم</button>
-      </form>
+      </div>
+
+      <!-- Backup & Export -->
+      <div class="card">
+        <div class="card-title">
+          <span>پشتیبان‌گیری و خروجی لاگ‌بوک</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">خروجی رسمی اکسل / CSV جهت ارائه به مربیان و فدراسیون، یا بکاپ فایل JSON بین گوشی آیفون و اندروید.</p>
+        <button class="btn-submit" onclick="exportCSV()" style="margin-top: 0; background: #0284c7; margin-bottom: 8px;">دانلود فایل اکسل / CSV لاگ‌بوک</button>
+        <div class="row">
+          <button class="btn-submit" onclick="backupJSON()" style="margin-top: 0; background: #1a3252;">بکاپ JSON</button>
+          <button class="btn-submit" onclick="document.getElementById('import-file').click()" style="margin-top: 0; background: #1a3252;">بازیابی JSON</button>
+          <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importJSON(event)">
+        </div>
+      </div>
     </div>
+
   </div>
 
-  <!-- MODAL: LOG NEW FLIGHT -->
-  <div id="modal-log-flight" class="modal-overlay">
+  <!-- QUICK LOG MODAL -->
+  <div id="log-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>ثبت پرواز جدید</h2>
+        <h2 id="modal-title">ثبت پرواز جدید (APPI Flight Log)</h2>
         <button class="close-btn" onclick="closeLogModal()">&times;</button>
       </div>
-      <form id="flight-form" onsubmit="handleLogFlightSubmit(event)">
-        <!-- Pilot Selector for Flight -->
-        <div class="form-group" id="f-pilot-select-group" style="background: #0d1e33; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); margin-bottom: 12px;">
-          <label style="color: var(--accent); font-weight: 700;">خلبان این پرواز (Pilot):</label>
-          <select id="f-pilot-select"></select>
-        </div>
+
+      <form id="flight-form" onsubmit="handleFormSubmit(event)">
         <!-- XContest & IGC Smart Import Card -->
         <div class="xcontest-import-card">
           <div class="xcontest-title">
@@ -718,7 +921,7 @@
             <span class="xcontest-badge">هوشمند</span>
           </div>
           <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
-            با انتخاب فایل ترک (IGC) خروجی XCTrack یا وارد کردن لینک XContest، تمام اطلاعات پرواز به صورت خودکار در فیلدهای زیر جای‌گذاری می‌شود:
+            با انتخاب فایل ترک (IGC) خروجی XCTrack یا وارد کردن لینک XContest، تمام اطلاعات پرواز خودکار پر می‌شوند:
           </p>
           <div style="margin-bottom: 8px;">
             <button type="button" class="btn-import-igc" onclick="document.getElementById('igc-file-input').click()">
@@ -735,18 +938,18 @@
         </div>
         <div class="row">
           <div class="form-group" style="flex: 0.8;">
-            <label>شماره پرواز</label>
+            <label>شماره پرواز (N°)</label>
             <input type="number" id="f-num" required>
           </div>
           <div class="form-group" style="flex: 1.2;">
-            <label>تاریخ پرواز</label>
+            <label>تاریخ (Date)</label>
             <input type="date" id="f-date" required>
           </div>
         </div>
 
         <div class="form-group">
-          <label>سایت پروازی و تیک‌آف</label>
-          <input type="text" id="f-site" list="site-suggestions" placeholder="مهدیرجه، سرکت، رامسر، کلاردشت..." required>
+          <label>سایت پروازی و تیک‌آف (Flying Site)</label>
+          <input type="text" id="f-site" list="site-suggestions" placeholder="مهدیرجه، سرکت، کلاردشت، رامسر..." required>
           <datalist id="site-suggestions">
             <option value="مهدیرجه (بهشهر - مازندران)">
             <option value="سرکت (ساری - مازندران)">
@@ -754,30 +957,32 @@
             <option value="کلاردشت (مازندران)">
             <option value="شهران (تهران)">
             <option value="آبعلی (تهران)">
+            <option value="دماوند / چنارشرق">
           </datalist>
         </div>
 
         <div class="row">
           <div class="form-group">
-            <label>نوع پرواز</label>
+            <label>نوع پرواز (Flight Type)</label>
             <select id="f-type">
-              <option value="Ridge Soaring">ریج سورینگ (Ridge Soaring)</option>
+              <option value="Ridge Soaring" selected>ریج سورینگ (Ridge Soaring)</option>
               <option value="Thermal">ترمال (Thermal Soaring)</option>
-              <option value="Sled Ride">تاپ تو باتم (Top-to-Bottom)</option>
-              <option value="XC">مسافت (XC)</option>
-              <option value="Training">تمرینی شیب</option>
+              <option value="Sled Ride">تاپ تو باتم (Top-to-Bottom Glide)</option>
+              <option value="XC">مسافت (Cross Country XC)</option>
+              <option value="Training">تمرینی شیب (Training Slope)</option>
+              <option value="Tandem">دونفره تندم (Tandem)</option>
             </select>
           </div>
           <div class="form-group">
-            <label>مدت پرواز (دقیقه)</label>
+            <label>مدت پرواز (دقیقه / Duration)</label>
             <input type="number" id="f-duration" placeholder="مثلاً ۴۵" min="1" required>
           </div>
         </div>
 
         <div class="row">
           <div class="form-group">
-            <label>بال و کلاس</label>
-            <input type="text" id="f-glider" placeholder="Ozone Mojo (EN-A)">
+            <label>بال و کلاس (Glider & Class)</label>
+            <input type="text" id="f-glider" placeholder="مثلاً Ozone Mojo 6 (EN-A)">
           </div>
           <div class="form-group">
             <label>مسافت XC (km)</label>
@@ -785,499 +990,369 @@
           </div>
         </div>
         <div class="form-group">
-          <label>حداکثر ارتفاع / گین (m)</label>
-          <input type="number" id="f-alt" placeholder="مثلاً 550">
+          <label>حداکثر ارتفاع / گین (Max Alt)</label>
+          <input type="number" id="f-alt" placeholder="متر (m)">
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>شرایط باد و ابر (Wind & Cloud)</label>
+            <input type="text" id="f-wind" placeholder="مثلاً 14km/h N دریایی، صاف">
+          </div>
+          <div class="form-group">
+            <label>حداکثر لیفت (Max Lift)</label>
+            <input type="text" id="f-lift" placeholder="+2.5 m/s">
+          </div>
         </div>
 
         <div class="form-group">
-          <label>شرایط باد و وضعیت جوی</label>
-          <input type="text" id="f-wind" placeholder="مثلاً 14km/h N دریایی، صاف">
+          <label>تمرین آموزشی (Training Exercise - صفحات لاگ‌بوک)</label>
+          <input type="text" id="f-exercise" placeholder="مثلاً کنترل پیچ، بیگ ایرز + اسپید، تقرب فرود...">
         </div>
 
         <div class="form-group">
-          <label>تمرین آموزشی و مانورها</label>
-          <input type="text" id="f-exercise" placeholder="مثلاً کنترل پیچ، بیگ ایرز + اسپید بار...">
+          <label>توضیحات و فرود (Comments: Takeoff, Flight, Landing...)</label>
+          <textarea id="f-notes" rows="2" placeholder="توضیحات تیک‌آف، مسیر، فرود در هدف، باد تیک‌آف و لندینگ..."></textarea>
         </div>
 
-        <div class="form-group">
-          <label>توضیحات تیک‌آف و نحوه لندینگ</label>
-          <textarea id="f-notes" rows="2" placeholder="توضیحات فرود در هدف، باد تیک‌آف..."></textarea>
+        <div style="background: #08111e; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--card-border);">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-bottom: 6px;">تاییدیه و امضاء مربی (INSTRUCTOR VALIDATION)</div>
+          <div class="row">
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="text" id="f-instructor" placeholder="نام مربی / شماره گواهینامه APPI">
+            </div>
+            <div class="form-group" style="margin-bottom: 0; flex: 0.6;">
+              <select id="f-validated">
+                <option value="Verified">تایید شد (Verified)</option>
+                <option value="Pending" selected>در انتظار (Pending)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <button type="submit" class="btn-submit">ارسال آنلاین به مربی جهت تایید</button>
+        <button type="submit" class="btn-submit">ثبت در لاگ‌بوک رسمی APPI</button>
       </form>
     </div>
   </div>
 
   <!-- Bottom Navigation -->
-  <nav class="bottom-nav" id="bottom-nav">
-    <!-- Populated dynamically based on role -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="navigate('flights', this)">
+      <span class="nav-icon">📖</span>
+      <span data-fa="لاگ‌بوک" data-en="Logbook">لاگ‌بوک</span>
+    </button>
+    <button class="nav-item" onclick="navigate('levels', this)">
+      <span class="nav-icon">🎖️</span>
+      <span data-fa="مدارک APPI" data-en="Syllabus">مدارک APPI</span>
+    </button>
+    <button class="nav-item" onclick="navigate('safety', this)">
+      <span class="nav-icon">🛡️</span>
+      <span data-fa="ایمنی و پرواز" data-en="B.E.S.A.F.E">ایمنی و پرواز</span>
+    </button>
+    <button class="nav-item" onclick="navigate('profile', this)">
+      <span class="nav-icon">👤</span>
+      <span data-fa="پروفایل و خروجی" data-en="Profile">پروفایل و خروجی</span>
+    </button>
   </nav>
 
   <script>
-    // State
-    let currentRole = localStorage.getItem('paragliding_current_role') || 'student'; // Default to student for all students
-    let currentStudentId = null;
-    let students = [];
-    let allFlights = [];
-    let instructorPin = "1234";
-
-    // Clean initial team data (no dummy/sample users)
-    function initSampleData() {
-      // Clear legacy dummy sample data if present
-      let rawStudents = localStorage.getItem('paragliding_team_students');
-      if (rawStudents) {
-        try {
-          let parsed = JSON.parse(rawStudents);
-          // filter out old demo users
-          students = parsed.filter(s => s.id !== 'stud_1' && s.id !== 'stud_2' && s.id !== 'stud_3');
-        } catch(e) { students = []; }
-      } else {
-        students = [];
-      }
-      localStorage.setItem('paragliding_team_students', JSON.stringify(students));
-
-      let rawFlights = localStorage.getItem('paragliding_team_flights');
-      if (rawFlights) {
-        try {
-          let parsed = JSON.parse(rawFlights);
-          allFlights = parsed.filter(f => f.id !== 1710000001 && f.id !== 1710000002);
-        } catch(e) { allFlights = []; }
-      } else {
-        allFlights = [];
-      }
-      localStorage.setItem('paragliding_team_flights', JSON.stringify(allFlights));
-    }
-
-    function saveState() {
-      localStorage.setItem('paragliding_team_students', JSON.stringify(students));
-      localStorage.setItem('paragliding_team_flights', JSON.stringify(allFlights));
-    }
-
-        // Role Switching
-    function promptSwitchRole() {
-      if (currentRole === 'instructor') {
-        currentRole = 'student';
-        localStorage.setItem('paragliding_current_role', 'student');
-        renderApp();
-      } else {
-        const pin = prompt('رمز عبور مربی (نوید) را وارد کنید:', '1234');
-        if (pin === instructorPin) {
-          currentRole = 'instructor';
-          localStorage.setItem('paragliding_current_role', 'instructor');
-          renderApp();
-        } else if (pin !== null) {
-          alert('رمز عبور اشتباه است.');
-        }
-      }
-    }
-
-        function renderApp() {
-      const badge = document.getElementById('role-badge');
-      const btnRole = document.getElementById('btn-role');
-
-      if (currentRole === 'instructor') {
-        badge.className = 'badge-role badge-instructor';
-        badge.innerText = 'مربی (نوید)';
-        btnRole.innerText = 'نمای هنرجو';
-        btnRole.style.borderColor = 'var(--card-border)';
-        btnRole.style.color = 'var(--text)';
-        renderInstructorNav();
-        navigate('inst-roster');
-        renderInstructorView();
-      } else {
-        const ident = getOrCreateStudentIdentity();
-        badge.className = 'badge-role badge-student';
-        badge.innerText = 'خلبان: ' + ident.name;
-        btnRole.innerText = '🔐 ورود مربی';
-        btnRole.style.borderColor = 'var(--gold)';
-        btnRole.style.color = 'var(--gold)';
-        renderStudentNav();
-        navigate('stud-flights');
-        renderStudentView();
-      }
-    }
-
-    function renderInstructorNav() {
-      const nav = document.getElementById('bottom-nav');
-      const pendingCount = allFlights.filter(f => f.status === 'Pending').length;
-      nav.innerHTML = `
-        <button class="nav-item active" onclick="navigate('inst-roster', this)">
-          <span class="nav-icon">👥</span>
-          <span>تیم و هنرجویان</span>
-        </button>
-        <button class="nav-item" onclick="navigate('inst-pending', this)">
-          <span class="nav-icon">⏳</span>
-          <span>تایید پروازها ${pendingCount > 0 ? `(${pendingCount})` : ''}</span>
-        </button>
-        <button class="nav-item" onclick="navigate('cloud-config', this)">
-          <span class="nav-icon">☁️</span>
-          <span>تنظیمات ابری</span>
-        </button>
-      `;
-    }
-
-    function renderStudentNav() {
-      const nav = document.getElementById('bottom-nav');
-      nav.innerHTML = `
-        <button class="nav-item active" onclick="navigate('stud-flights', this)">
-          <span class="nav-icon">📖</span>
-          <span>پروازهای من</span>
-        </button>
-        <button class="nav-item" onclick="navigate('cloud-config', this)">
-          <span class="nav-icon">☁️</span>
-          <span>دیتابیس ابری</span>
-        </button>
-      `;
-    }
+    let flights = [];
+    let currentFilter = 'all';
+    let isFarsi = true;
 
     function navigate(screenId, element) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
       
-      const target = document.getElementById('screen-' + screenId);
-      if (target) target.classList.add('active');
+      document.getElementById('screen-' + screenId).classList.add('active');
       if (element) element.classList.add('active');
     }
 
-    // Instructor Views
-    function renderInstructorView() {
-      // Stats
-      document.getElementById('inst-total-students').innerText = students.length;
-      document.getElementById('inst-total-flights').innerText = allFlights.length;
-      const pendingCount = allFlights.filter(f => f.status === 'Pending').length;
-      document.getElementById('inst-pending-count').innerText = pendingCount;
-      const totalMinutes = allFlights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
-      document.getElementById('inst-total-hours').innerText = (totalMinutes / 60).toFixed(1) + "h";
+    function toggleLanguage() {
+      isFarsi = !isFarsi;
+      document.documentElement.dir = isFarsi ? 'rtl' : 'ltr';
+      document.documentElement.lang = isFarsi ? 'fa' : 'en';
+      document.getElementById('btn-lang').innerText = isFarsi ? 'English' : 'فارسی';
 
-      // Roster List
-      const rosterList = document.getElementById('roster-list');
-      rosterList.innerHTML = '';
-      if (students.length === 0) {
-        rosterList.innerHTML = `<div class="empty-state" style="padding: 24px;">
-          <div style="font-size: 2rem; margin-bottom: 6px;">👥</div>
-          <div style="color: #fff; font-weight: 700;">هنوز هنرجویی به تیم اضافه نشده است</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">برای افزودن خلبانان تیم، دکمه «+ افزودن هنرجو» در بالا را بزنید.</div>
-        </div>`;
-      }
-      students.forEach(s => {
-        const studentFlights = allFlights.filter(f => f.studentId === s.id);
-        const pending = studentFlights.filter(f => f.status === 'Pending').length;
-        const totalDuration = studentFlights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
-
-        const card = document.createElement('div');
-        card.className = 'student-card';
-        card.innerHTML = `
-          <div class="student-header">
-            <div>
-              <span class="student-name">${s.name}</span>
-              <span style="font-size: 0.75rem; color: var(--accent); margin-right: 8px;">APPI ID: ${s.appiId || '-'}</span>
-            </div>
-            ${pending > 0 ? `<span class="badge-pending-count">${pending} پرواز منتظر تایید</span>` : `<span style="font-size: 0.75rem; color: var(--success);">✓ به‌روز</span>`}
-          </div>
-          <div style="font-size: 0.78rem; color: var(--text-muted);">سطح: <strong>${s.level}</strong> | همراه: ${s.phone || '-'}</div>
-          <div class="student-stats-bar">
-            <span>✈️ ${studentFlights.length} پرواز</span>
-            <span>⏱️ ${(totalDuration / 60).toFixed(1)} ساعت هوایی</span>
-            <button onclick="deleteStudent('${s.id}', '${s.name}', event)" style="margin-right: auto; background: none; border: none; color: #ef4444; font-size: 0.75rem; cursor: pointer; padding: 2px 6px;">حذف هنرجو</button>
-          </div>
-        `;
-        rosterList.appendChild(card);
+      document.querySelectorAll('[data-fa]').forEach(el => {
+        el.innerText = isFarsi ? el.getAttribute('data-fa') : el.getAttribute('data-en');
       });
-
-      // Pending Flights List
-      renderPendingFlights();
     }
 
-    function renderPendingFlights() {
-      const container = document.getElementById('pending-flights-list');
-      const emptyState = document.getElementById('empty-pending');
+    function openLogModal() {
+      const modal = document.getElementById('log-modal');
+      modal.classList.add('active');
+      document.getElementById('f-date').valueAsDate = new Date();
+      document.getElementById('f-num').value = flights.length + 1;
+    }
+
+    function closeLogModal() {
+      document.getElementById('log-modal').classList.remove('active');
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const newFlight = {
+        id: Date.now(),
+        num: parseInt(document.getElementById('f-num').value) || (flights.length + 1),
+        date: document.getElementById('f-date').value,
+        site: document.getElementById('f-site').value,
+        type: document.getElementById('f-type').value,
+        duration: parseInt(document.getElementById('f-duration').value) || 0,
+        glider: document.getElementById('f-glider').value || 'Standard Wing',
+        alt: document.getElementById('f-alt').value || '-',
+        wind: document.getElementById('f-wind').value || '-',
+        lift: document.getElementById('f-lift').value || '-',
+        exercise: document.getElementById('f-exercise').value || '',
+        notes: document.getElementById('f-notes').value || '',
+        instructor: document.getElementById('f-instructor').value || '',
+        distance: document.getElementById('f-distance')?.value || '',
+        xcontestUrl: document.getElementById('f-xcontest')?.value || '',
+        validated: document.getElementById('f-validated').value
+      };
+
+      flights.unshift(newFlight);
+      saveFlights();
+      renderFlights();
+      closeLogModal();
+      document.getElementById('flight-form').reset();
+    }
+
+    function deleteFlight(id) {
+      if (confirm(isFarsi ? 'آیا این پرواز از لاگ‌بوک حذف شود؟' : 'Delete this flight entry?')) {
+        flights = flights.filter(f => f.id !== id);
+        saveFlights();
+        renderFlights();
+      }
+    }
+
+    function filterFlights(type) {
+      currentFilter = type;
+      renderFlights();
+    }
+
+    function renderFlights() {
+      const container = document.getElementById('flights-container');
+      const emptyState = document.getElementById('empty-flights');
       container.innerHTML = '';
 
-      const pending = allFlights.filter(f => f.status === 'Pending');
-      if (pending.length === 0) {
+      let filtered = flights;
+      if (currentFilter !== 'all') {
+        filtered = flights.filter(f => f.type === currentFilter);
+      }
+
+      if (filtered.length === 0) {
         emptyState.style.display = 'block';
       } else {
         emptyState.style.display = 'none';
-        pending.forEach(f => {
+        filtered.forEach(f => {
           const card = document.createElement('div');
           card.className = 'flight-card';
           card.innerHTML = `
             <div class="flight-header">
-              <span class="flight-pilot-name">خلبان: ${f.studentName}</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">${f.date}</span>
-            </div>
-            <div class="flight-site">${f.site} (پرواز شماره #${f.num})</div>
-            <div class="flight-tags">
-              <span class="tag tag-duration">⏱️ ${f.duration} دقیقه</span>
-              <span class="tag">${f.type}</span>
-              <span class="tag">🪂 ${f.glider}</span>
-              ${f.alt ? `<span class="tag">⛰️ ${f.alt}m</span>` : ''}
-              ${f.distance ? `<span class="tag">📏 ${f.distance} km</span>` : ''}
-              ${f.wind ? `<span class="tag">💨 ${f.wind}</span>` : ''}
-            </div>
-            ${f.xcontestUrl ? `<div><a href="${f.xcontestUrl}" target="_blank" rel="noopener noreferrer" class="btn-xcontest-link">🗺️ مشاهده ترک ۳بعدی در XContest</a></div>` : ''}
-            <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px;">🎯 تمرین: ${f.exercise || 'ثبت نشده'}</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">📝 توضیحات: ${f.notes || '-'}</div>
-
-            <div class="instructor-box">
-              <strong>تاییدیه مربی:</strong>
-              <input type="text" id="note-${f.id}" placeholder="یادداشت مربی برای هنرجو (اختیاری)..." style="margin-bottom: 8px;">
-              <button class="btn-verify-action" onclick="verifyFlight(${f.id})">
-                ✓ امضاء و تایید رسمی این پرواز
-              </button>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      }
-    }
-
-    function deleteStudent(studentId, studentName, e) {
-      if (e) e.stopPropagation();
-      if (confirm('آیا از حذف هنرجو "' + studentName + '" از لیست تیم اطمینان دارید؟ تمام پروازهای این هنرجو نیز حذف خواهند شد.')) {
-        students = students.filter(s => s.id !== studentId);
-        allFlights = allFlights.filter(f => f.studentId !== studentId);
-        saveState();
-        renderInstructorView();
-        renderInstructorNav();
-      }
-    }
-
-    function verifyFlight(flightId) {
-      const noteInput = document.getElementById('note-' + flightId);
-      const note = noteInput ? noteInput.value : '';
-
-      const flight = allFlights.find(f => f.id === flightId);
-      if (flight) {
-        flight.status = 'Verified';
-        flight.verifiedBy = 'نوید (مربی APPI)';
-        flight.verifiedAt = new Date().toISOString().slice(0, 10);
-        flight.instructorNote = note;
-        saveState();
-        alert('پرواز شماره #' + flight.num + ' خلبان ' + flight.studentName + ' با موفقیت تایید و امضاء شد.');
-        renderInstructorView();
-        renderInstructorNav();
-      }
-    }
-
-    // Student Views
-    function renderStudentView() {
-      const ident = getOrCreateStudentIdentity();
-      document.getElementById('disp-student-name').innerText = ident.name;
-
-      const myFlights = allFlights.filter(f => f.studentId === ident.id || f.studentName === ident.name);
-      document.getElementById('stud-flight-count').innerText = myFlights.length;
-      const totalMinutes = myFlights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
-      document.getElementById('stud-airtime').innerText = (totalMinutes / 60).toFixed(1) + "h";
-      document.getElementById('stud-verified').innerText = myFlights.filter(f => f.status === 'Verified').length;
-      document.getElementById('stud-pending').innerText = myFlights.filter(f => f.status === 'Pending').length;
-
-      const container = document.getElementById('stud-flights-container');
-      const emptyState = document.getElementById('stud-empty-flights');
-      container.innerHTML = '';
-
-      if (myFlights.length === 0) {
-        emptyState.style.display = 'block';
-      } else {
-        emptyState.style.display = 'none';
-        myFlights.forEach(f => {
-          const card = document.createElement('div');
-          card.className = 'flight-card';
-          card.innerHTML = `
-            <div class="flight-header">
-              <span style="font-weight: 800; color: var(--accent);">پرواز #${f.num}</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">${f.date}</span>
+              <span class="flight-num">پرواز #${f.num} (Flight #${f.num})</span>
+              <span class="flight-date">${f.date}</span>
             </div>
             <div class="flight-site">${f.site}</div>
             <div class="flight-tags">
               <span class="tag tag-duration">⏱️ ${f.duration} دقیقه</span>
               <span class="tag">${f.type}</span>
               <span class="tag">🪂 ${f.glider}</span>
-              ${f.alt ? `<span class="tag">⛰️ ${f.alt}m</span>` : ''}
+              ${f.alt !== '-' ? `<span class="tag">⛰️ ${f.alt}m</span>` : ''}
+              ${f.wind !== '-' ? `<span class="tag">💨 ${f.wind}</span>` : ''}
               ${f.distance ? `<span class="tag">📏 ${f.distance} km</span>` : ''}
-              <span class="tag ${f.status === 'Verified' ? 'tag-verified' : 'tag-pending'}">
-                ${f.status === 'Verified' ? '✓ تایید شده توسط مربی' : '⏳ در انتظار تایید مربی'}
+              ${f.lift !== '-' ? `<span class="tag">📈 ${f.lift}</span>` : ''}
+              <span class="tag ${f.validated === 'Verified' ? 'tag-validated' : ''}">
+                ${f.validated === 'Verified' ? '✓ تایید: ' + (f.instructor ? f.instructor : 'مربی') : '⏳ در انتظار تایید'}
               </span>
             </div>
             ${f.xcontestUrl ? `<div><a href="${f.xcontestUrl}" target="_blank" rel="noopener noreferrer" class="btn-xcontest-link">🗺️ مشاهده ترک ۳بعدی در XContest</a></div>` : ''}
-            ${f.exercise ? `<div style="font-size: 0.8rem; color: #38bdf8; margin-top: 4px;">🎯 تمرین: ${f.exercise}</div>` : ''}
-            ${f.notes ? `<div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">📝 ${f.notes}</div>` : ''}
-            ${f.instructorNote ? `
-              <div class="instructor-box" style="margin-top: 8px;">
-                <strong>یادداشت مربی (نوید):</strong>
-                <div>${f.instructorNote}</div>
-              </div>
-            ` : ''}
+            ${f.exercise ? `<div class="flight-exercise">🎯 تمرین: ${f.exercise}</div>` : ''}
+            ${f.notes ? `<div class="flight-notes">📝 ${f.notes}</div>` : ''}
+            <div class="card-actions">
+              <button class="btn-delete" onclick="deleteFlight(${f.id})">حذف پرواز</button>
+            </div>
           `;
           container.appendChild(card);
         });
       }
+
+      updateStats();
     }
 
-    // Modals
-    function openAddStudentModal() {
-      document.getElementById('modal-add-student').classList.add('active');
-    }
-    function closeAddStudentModal() {
-      document.getElementById('modal-add-student').classList.remove('active');
-    }
-    function handleAddStudentSubmit(e) {
-      e.preventDefault();
-      const newS = {
-        id: 'stud_' + Date.now(),
-        name: document.getElementById('new-stud-name').value,
-        appiId: document.getElementById('new-stud-appi').value,
-        level: document.getElementById('new-stud-level').value,
-        phone: document.getElementById('new-stud-phone').value
-      };
-      students.push(newS);
-      saveState();
-      closeAddStudentModal();
-      document.getElementById('new-stud-name').value = '';
-      document.getElementById('new-stud-appi').value = '';
-      document.getElementById('new-stud-phone').value = '';
-      renderInstructorView();
-      alert('هنرجو با موفقیت به تیم اضافه شد.');
+    function updateStats() {
+      document.getElementById('stat-total-flights').innerText = flights.length;
+      const totalMinutes = flights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
+      const hours = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+      document.getElementById('stat-total-hours').innerText = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+      
+      const soaring = flights.filter(f => f.type === 'Ridge Soaring' || f.type === 'Thermal').length;
+      document.getElementById('stat-soaring-count').innerText = soaring;
+
+      const verified = flights.filter(f => f.validated === 'Verified').length;
+      document.getElementById('stat-verified-count').innerText = verified;
     }
 
-    function openLogModal() {
-      // Populate pilot selector dropdown
-      const pilotSelect = document.getElementById('f-pilot-select');
-      if (pilotSelect) {
-        pilotSelect.innerHTML = '';
-        const instOpt = document.createElement('option');
-        instOpt.value = 'inst_navid';
-        instOpt.text = 'نوید (مربی)';
-        pilotSelect.appendChild(instOpt);
-
-        students.forEach(s => {
-          const opt = document.createElement('option');
-          opt.value = s.id;
-          opt.text = s.name + (s.level ? ' (' + s.level + ')' : '');
-          if (currentRole === 'student' && s.id === currentStudentId) {
-            opt.selected = true;
-          }
-          pilotSelect.appendChild(opt);
-        });
-      }
-
-      document.getElementById('f-num').value = allFlights.length + 1;
-      document.getElementById('f-date').valueAsDate = new Date();
-      const banner = document.getElementById('igc-status-banner');
-      if (banner) banner.style.display = 'none';
-      document.getElementById('modal-log-flight').classList.add('active');
-    }
-    function closeLogModal() {
-      document.getElementById('modal-log-flight').classList.remove('active');
+    function saveFlights() {
+      localStorage.setItem('official_appi_flights_data', JSON.stringify(flights));
     }
 
-    function handleLogFlightSubmit(e) {
-      e.preventDefault();
-      let pilotName = 'هنرجو';
-      let studentId = 'stud_' + Date.now();
-
-      if (currentRole === 'instructor') {
-        const pilotSelect = document.getElementById('f-pilot-select');
-        const selectedId = pilotSelect ? pilotSelect.value : 'inst_navid';
-        if (selectedId === 'inst_navid') {
-          pilotName = 'نوید (مربی)';
-          studentId = 'inst_navid';
-        } else {
-          const s = students.find(item => item.id === selectedId);
-          pilotName = s ? s.name : 'هنرجو';
-          studentId = selectedId;
+    function loadFlights() {
+      const saved = localStorage.getItem('official_appi_flights_data');
+      if (saved) {
+        try {
+          flights = JSON.parse(saved);
+        } catch(e) {
+          flights = [];
         }
-      } else {
-        const ident = getOrCreateStudentIdentity();
-        pilotName = ident.name;
-        studentId = ident.id;
       }
-
-      const newF = {
-        id: Date.now(),
-        studentId: studentId,
-        studentName: pilotName,
-        num: parseInt(document.getElementById('f-num').value) || 1,
-        date: document.getElementById('f-date').value,
-        site: document.getElementById('f-site').value,
-        type: document.getElementById('f-type').value,
-        duration: parseInt(document.getElementById('f-duration').value) || 0,
-        glider: document.getElementById('f-glider').value || 'Standard Wing',
-        alt: document.getElementById('f-alt').value || '',
-        distance: document.getElementById('f-distance')?.value || '',
-        wind: document.getElementById('f-wind').value || '',
-        exercise: document.getElementById('f-exercise').value || '',
-        notes: document.getElementById('f-notes').value || '',
-        xcontestUrl: document.getElementById('f-xcontest')?.value || '',
-        status: 'Pending',
-        instructorNote: ''
-      };
-
-      allFlights.unshift(newF);
-      saveState();
-      closeLogModal();
-      document.getElementById('flight-form').reset();
-      renderStudentView();
-      alert('پرواز با موفقیت ثبت شد و برای تایید مربی نوید ارسال گردید.');
+      renderFlights();
     }
 
-    // Cloud Config & Export
-    function saveCloudConfig() {
-      const clubId = document.getElementById('cfg-club-id').value;
-      instructorPin = document.getElementById('cfg-inst-pin').value || "1234";
-      localStorage.setItem('paragliding_club_id', clubId);
-      localStorage.setItem('paragliding_instructor_pin', instructorPin);
-      alert('تنظیمات تیم و رمز مربی با موفقیت ذخیره شد.');
+    // Pilot Profile
+    function savePilotProfile() {
+      const profile = {
+        name: document.getElementById('prof-name').value,
+        appiId: document.getElementById('prof-appi-id').value,
+        blood: document.getElementById('prof-blood').value,
+        phone: document.getElementById('prof-phone').value,
+        ice: document.getElementById('prof-ice').value,
+        email: document.getElementById('prof-email').value,
+      };
+      localStorage.setItem('appi_pilot_profile', JSON.stringify(profile));
+      alert(isFarsi ? 'اطلاعات خلبان با موفقیت ذخیره شد.' : 'Pilot profile saved successfully!');
     }
 
-    function exportFullTeamJSON() {
-      const exportData = {
-        clubId: document.getElementById('cfg-club-id').value,
-        exportDate: new Date().toISOString(),
-        students: students,
-        flights: allFlights
-      };
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    function loadPilotProfile() {
+      const saved = localStorage.getItem('appi_pilot_profile');
+      if (saved) {
+        try {
+          const p = JSON.parse(saved);
+          if (p.name) document.getElementById('prof-name').value = p.name;
+          if (p.appiId) document.getElementById('prof-appi-id').value = p.appiId;
+          if (p.blood) document.getElementById('prof-blood').value = p.blood;
+          if (p.phone) document.getElementById('prof-phone').value = p.phone;
+          if (p.ice) document.getElementById('prof-ice').value = p.ice;
+          if (p.email) document.getElementById('prof-email').value = p.email;
+        } catch(e) {}
+      }
+    }
+
+    // Progress
+    function saveAppiProgress() {
+      const checkboxes = document.querySelectorAll('#screen-levels input[type="checkbox"]');
+      const progress = {};
+      checkboxes.forEach(cb => { progress[cb.id] = cb.checked; });
+      localStorage.setItem('official_appi_progress_state', JSON.stringify(progress));
+      calcAppiPercentages();
+    }
+
+    function loadAppiProgress() {
+      const saved = localStorage.getItem('official_appi_progress_state');
+      if (saved) {
+        try {
+          const progress = JSON.parse(saved);
+          Object.keys(progress).forEach(id => {
+            const cb = document.getElementById(id);
+            if (cb) cb.checked = progress[id];
+          });
+        } catch(e) {}
+      }
+      calcAppiPercentages();
+    }
+
+    function calcAppiPercentages() {
+      const levels = [
+        { prefix: 'os-', key: 'open-sky' },
+        { prefix: 'adv-', key: 'adv' },
+        { prefix: 'pi-', key: 'pilot' },
+        { prefix: 'sv-', key: 'siv' },
+        { prefix: 'xc-', key: 'xc' }
+      ];
+
+      levels.forEach(lvl => {
+        const cbs = document.querySelectorAll(`[id^="${lvl.prefix}"]`);
+        let checked = 0;
+        cbs.forEach(cb => { if(cb.checked) checked++; });
+        const pct = cbs.length ? Math.round((checked / cbs.length) * 100) : 0;
+        const txt = document.getElementById('p-' + lvl.key);
+        const bar = document.getElementById('bar-' + lvl.key);
+        if (txt) txt.innerText = pct + '%';
+        if (bar) bar.style.width = pct + '%';
+      });
+    }
+
+    // Export CSV
+    function exportCSV() {
+      if (flights.length === 0) {
+        alert(isFarsi ? 'پروازی برای دانلود وجود ندارد.' : 'No flights to export.');
+        return;
+      }
+      let csv = "Flight,Date,Site,Type,Duration_Mins,Glider,Max_Alt,Wind,Max_Lift,Exercise,Comments,Instructor,Validation\n";
+      flights.forEach(f => {
+        csv += `"${f.num}","${f.date}","${f.site}","${f.type}","${f.duration}","${f.glider}","${f.alt}","${f.wind}","${f.lift}","${(f.exercise||'').replace(/"/g, '""')}","${(f.notes||'').replace(/"/g, '""')}","${f.instructor}","${f.validated}"\n`;
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `appi_team_database_${new Date().toISOString().slice(0,10)}.json`);
+      link.setAttribute("download", `appi_paragliding_logbook_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
-    function importFullTeamJSON(event) {
+    function backupJSON() {
+      const data = {
+        pilot: JSON.parse(localStorage.getItem('appi_pilot_profile') || '{}'),
+        flights: flights,
+        progress: JSON.parse(localStorage.getItem('official_appi_progress_state') || '{}')
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `appi_logbook_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function importJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (imported.students) students = imported.students;
-          if (imported.flights) allFlights = imported.flights;
-          saveState();
-          renderApp();
-          alert('کل دیتابیس تیم با موفقیت بازیابی شد!');
+          if (imported.flights) {
+            flights = imported.flights;
+            saveFlights();
+            renderFlights();
+          }
+          if (imported.progress) {
+            localStorage.setItem('official_appi_progress_state', JSON.stringify(imported.progress));
+            loadAppiProgress();
+          }
+          if (imported.pilot) {
+            localStorage.setItem('appi_pilot_profile', JSON.stringify(imported.pilot));
+            loadPilotProfile();
+          }
+          alert(isFarsi ? 'اطلاعات با موفقیت بازیابی شد!' : 'Logbook restored successfully!');
         } catch(err) {
-          alert('خطا در بارگذاری فایل دیتابیس.');
+          alert('خطا در فایل بکاپ');
         }
       };
       reader.readAsText(file);
     }
 
-    // Init
     window.onload = function() {
-      initSampleData();
-      const savedPin = localStorage.getItem('paragliding_instructor_pin');
-      if (savedPin) instructorPin = savedPin;
-      const savedClub = localStorage.getItem('paragliding_club_id');
-      if (savedClub) document.getElementById('cfg-club-id').value = savedClub;
-      renderApp();
+      loadFlights();
+      loadAppiProgress();
+      loadPilotProfile();
     };
 
-    // Iranian Paragliding Sites GPS coordinates for auto-detection
     const iranianSites = [
       { name: 'مهدیرجه (بهشهر - مازندران)', lat: 36.685, lon: 53.535, radiusKm: 15 },
       { name: 'سرکت (ساری - مازندران)', lat: 36.435, lon: 53.155, radiusKm: 12 },
@@ -1292,25 +1367,22 @@
     ];
 
     function haversineDistKm(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Earth radius in km
+      const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                 Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
     function handleIgcFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
-        const text = e.target.result;
         try {
-          const parsed = parseIgcContent(text);
+          const parsed = parseIgcContent(e.target.result);
           applyParsedFlightData(parsed, file.name);
         } catch(err) {
           alert('خطا در پردازش فایل IGC: ' + err.message);
@@ -1321,15 +1393,10 @@
 
     function parseIgcContent(text) {
       const lines = text.split('\n');
-      let date = '';
-      let pilot = '';
-      let glider = '';
-      let bRecords = [];
-
+      let date = '', pilot = '', glider = '', bRecords = [];
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         if (line.startsWith('HFDTE')) {
-          // e.g. HFDTE280926 or HFDTE:280926
           const m = line.match(/(\d{2})(\d{2})(\d{2})/);
           if (m) {
             let yr = parseInt(m[3]);
@@ -1356,49 +1423,34 @@
           bRecords.push({ time_s: hh * 3600 + mm * 60 + ss, lat, lon, alt: gpsAlt });
         }
       }
-
-      if (bRecords.length < 2) {
-        return { date, pilot, glider };
-      }
+      if (bRecords.length < 2) return { date, pilot, glider };
 
       let startTime = bRecords[0].time_s;
       let endTime = bRecords[bRecords.length - 1].time_s;
-      if (endTime < startTime) endTime += 86400; // passed midnight
+      if (endTime < startTime) endTime += 86400;
       const durationMins = Math.max(1, Math.round((endTime - startTime) / 60));
 
       let maxAlt = 0;
-      for (let r of bRecords) {
-        if (r.alt > maxAlt) maxAlt = r.alt;
-      }
+      for (let r of bRecords) { if (r.alt > maxAlt) maxAlt = r.alt; }
 
-      // Straight-line max distance in km
-      const toLat = bRecords[0].lat;
-      const toLon = bRecords[0].lon;
+      const toLat = bRecords[0].lat, toLon = bRecords[0].lon;
       let maxDist = 0;
       for (let r of bRecords) {
         const d = haversineDistKm(toLat, toLon, r.lat, r.lon);
         if (d > maxDist) maxDist = d;
       }
 
-      // Match site
       let matchedSite = '';
       for (let s of iranianSites) {
-        const dist = haversineDistKm(toLat, toLon, s.lat, s.lon);
-        if (dist <= s.radiusKm) {
+        if (haversineDistKm(toLat, toLon, s.lat, s.lon) <= s.radiusKm) {
           matchedSite = s.name;
           break;
         }
       }
-      if (!matchedSite) {
-        matchedSite = `مختصات لانچ: ${toLat.toFixed(3)}, ${toLon.toFixed(3)}`;
-      }
+      if (!matchedSite) matchedSite = `مختصات: ${toLat.toFixed(3)}, ${toLon.toFixed(3)}`;
 
       return {
-        date,
-        pilot,
-        glider,
-        durationMins,
-        maxAlt,
+        date, pilot, glider, durationMins, maxAlt,
         distanceKm: maxDist > 0.5 ? maxDist.toFixed(1) : '',
         site: matchedSite,
         takeoffCoords: `${toLat.toFixed(4)}, ${toLon.toFixed(4)}`
@@ -1413,11 +1465,8 @@
       if (parsed.maxAlt) document.getElementById('f-alt').value = parsed.maxAlt;
       if (parsed.distanceKm && document.getElementById('f-distance')) {
         document.getElementById('f-distance').value = parsed.distanceKm;
-        if (parseFloat(parsed.distanceKm) >= 15) {
-          document.getElementById('f-type').value = 'XC';
-        }
+        if (parseFloat(parsed.distanceKm) >= 15) document.getElementById('f-type').value = 'XC';
       }
-
       if (parsed.takeoffCoords) {
         const notes = document.getElementById('f-notes');
         const info = `ترک IGC (${sourceLabel}) - لانچ: ${parsed.takeoffCoords}`;
@@ -1425,17 +1474,15 @@
           notes.value = notes.value ? notes.value + ' | ' + info : info;
         }
       }
-
       const banner = document.getElementById('igc-status-banner');
       if (banner) {
         banner.style.display = 'block';
-        banner.innerHTML = `✓ اطلاعات پرواز با موفقیت از فایل <strong>${sourceLabel}</strong> استخراج شد.<br>سایت شناسایی‌شده: <strong>${parsed.site || '-'}</strong> | مدت: <strong>${parsed.durationMins || '-'} دقیقه</strong> | حداکثر ارتفاع: <strong>${parsed.maxAlt || '-'} متر</strong>`;
+        banner.innerHTML = `✓ اطلاعات پرواز از فایل <strong>${sourceLabel}</strong> استخراج شد.<br>سایت: <strong>${parsed.site || '-'}</strong> | مدت: <strong>${parsed.durationMins || '-'} دقیقه</strong> | ارتفاع: <strong>${parsed.maxAlt || '-'} متر</strong>`;
       }
     }
 
     function handleXContestUrlChange(url) {
       if (!url || !url.includes('xcontest.org')) return;
-      // Example URL: https://www.xcontest.org/world/en/flights/detail:username/28.09.2026/09:30
       const match = url.match(/detail:([^/]+)\/(\d{1,2})[.](\d{1,2})[.](\d{4})/);
       if (match) {
         const username = decodeURIComponent(match[1]);
@@ -1443,7 +1490,6 @@
         const month = match[3].padStart(2, '0');
         const year = match[4];
         document.getElementById('f-date').value = `${year}-${month}-${day}`;
-
         const banner = document.getElementById('igc-status-banner');
         if (banner) {
           banner.style.display = 'block';
@@ -1453,40 +1499,7 @@
     }
 
 
-    function getOrCreateStudentIdentity() {
-      let savedName = localStorage.getItem('paragliding_my_student_name');
-      if (!savedName) {
-        savedName = 'هنرجوی پرواز';
-      }
-      let myId = localStorage.getItem('paragliding_my_student_id');
-      if (!myId) {
-        myId = 'stud_' + Date.now();
-        localStorage.setItem('paragliding_my_student_id', myId);
-      }
-      return { id: myId, name: savedName };
-    }
-
-    function changeStudentIdentity() {
-      const current = getOrCreateStudentIdentity();
-      const newName = prompt('نام و نام خانوادگی خود (خلبان) را وارد کنید:', current.name === 'هنرجوی پرواز' ? '' : current.name);
-      if (newName && newName.trim()) {
-        localStorage.setItem('paragliding_my_student_name', newName.trim());
-        // Also register in students list if not present
-        const myId = localStorage.getItem('paragliding_my_student_id') || ('stud_' + Date.now());
-        localStorage.setItem('paragliding_my_student_id', myId);
-        
-        let existing = students.find(s => s.id === myId);
-        if (existing) {
-          existing.name = newName.trim();
-        } else {
-          students.push({ id: myId, name: newName.trim(), level: 'هنرجو', appiId: '', phone: '' });
-        }
-        saveState();
-        renderStudentView();
-      }
-    }
-
-    function handleStudentDirectIgc(event) {
+    function handleSoloMainIgcUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 

@@ -603,6 +603,29 @@
 
     <!-- SCREEN 1: FLIGHT LOGS -->
     <div id="screen-flights" class="screen active">
+
+      <!-- PROMINENT XCONTEST & IGC DIRECT UPLOAD CARD -->
+      <div class="card" style="border: 2px dashed #0284c7; background: linear-gradient(135deg, #091a2e, #0e2b4d); padding: 18px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-size: 1.05rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+            <span>⚡ ورود خودکار پرواز از XContest و فایل IGC</span>
+          </div>
+          <span style="background: #f59e0b; color: #000; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 4px;">هوشمند</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+          فایل ترک IGC پروازتان (خروجی نرم‌افزارهای XCTrack، Flyskyhy یا دانلود شده از سایت XContest) را انتخاب کنید تا تاریخ، سایت پرواز، مدت زمان، حداکثر ارتفاع و مسافت به طور خودکار استخراج شده و در لاگ‌بوک ثبت شود:
+        </p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn-import-igc" onclick="document.getElementById('solo-main-igc-file').click()" style="flex: 1; min-width: 220px; padding: 12px 18px; background: linear-gradient(135deg, #0284c7, #0369a1); font-size: 0.9rem; font-weight: 700;">
+            📂 انتخاب فایل ترک IGC پرواز (XCTrack)
+          </button>
+          <button type="button" class="btn-import-igc" onclick="openLogModal()" style="flex: 1; min-width: 150px; padding: 12px 16px; background: #172c47; border: 1px solid var(--card-border); font-size: 0.9rem;">
+            ✍️ ثبت دستی یا لینک XContest
+          </button>
+        </div>
+        <input type="file" id="solo-main-igc-file" accept=".igc,.IGC" style="display: none;" onchange="handleSoloMainIgcUpload(event)">
+      </div>
+
       <!-- Quick Stats -->
       <div class="stats-grid">
         <div class="stat-pill">
@@ -1473,6 +1496,24 @@
           banner.innerHTML = `✓ لینک XContest برای خلبان <strong>${username}</strong> در تاریخ <strong>${year}/${month}/${day}</strong> متصل شد. لینک ۳بعدی روی پرواز ذخیره می‌شود.`;
         }
       }
+    }
+
+
+    function handleSoloMainIgcUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = parseIgcContent(e.target.result);
+          openLogModal();
+          applyParsedFlightData(parsed, file.name);
+        } catch(err) {
+          alert('خطا در پردازش فایل IGC: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
   </script>
