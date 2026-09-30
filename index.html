@@ -497,9 +497,9 @@
     </div>
     <div class="header-actions">
       <button class="btn-quick-log" onclick="openLogModal()" style="font-size: 0.78rem; padding: 6px 10px; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-        <span>⚡ ثبت پرواز / آپلود IGC</span>
+        <span>⚡ ثبت پرواز / IGC</span>
       </button>
-      <button class="btn-switch-role" onclick="promptSwitchRole()" id="btn-role">تغییر نقش</button>
+      <button class="btn-switch-role" onclick="promptSwitchRole()" id="btn-role" style="font-size: 0.75rem; padding: 6px 10px; background: #1a2f4c; color: var(--gold); border: 1px solid var(--gold); border-radius: 6px; font-weight: 700; cursor: pointer;">🔐 ورود مربی</button>
     </div>
   </header>
 
@@ -561,14 +561,33 @@
 
     <!-- STUDENT SCREEN 1: MY FLIGHTS -->
     <div id="screen-stud-flights" class="screen">
-      <div class="card" style="background: linear-gradient(135deg, #0f223a, #0a1626);">
+      <!-- Pilot Identity Bar -->
+      <div class="card" style="background: linear-gradient(135deg, #0f223a, #0a1626); margin-bottom: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="font-size: 0.8rem; color: var(--accent);">خلبان گرامی:</div>
-            <div id="disp-student-name" style="font-size: 1.15rem; font-weight: 800; color: #fff;">هنرجو</div>
+            <div style="font-size: 0.75rem; color: var(--accent);">خلبان تیم Sky Dolphins:</div>
+            <div id="disp-student-name" style="font-size: 1.1rem; font-weight: 800; color: #fff;">هنرجو</div>
           </div>
-          <button class="btn-switch-role" style="background: var(--primary);" onclick="openLogModal()">+ ثبت پرواز جدید</button>
+          <button class="btn-switch-role" style="font-size: 0.75rem;" onclick="changeStudentIdentity()">ویرایش نام خلبان</button>
         </div>
+      </div>
+
+      <!-- PROMINENT XCONTEST & IGC DIRECT UPLOAD BOX FOR STUDENTS -->
+      <div class="card" style="border: 2px dashed #0284c7; background: linear-gradient(135deg, #0a1b2e, #0e2744); padding: 18px; text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 1.8rem; margin-bottom: 4px;">⚡ 🪂</div>
+        <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 6px;">ثبت خودکار پرواز از فایل IGC یا XContest</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+          هنرجویان گرامی: فایل ترک پرواز خود (خروجی XCTrack، Flyskyhy یا دانلود شده از XContest) را انتخاب کنید تا سایت پرواز، مدت، ارتفاع و مسافت در یک ثانیه خودکار پر شده و برای تایید مربی نوید ارسال شود.
+        </p>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn-submit" onclick="document.getElementById('stud-direct-igc').click()" style="margin-top: 0; width: auto; padding: 11px 20px; font-size: 0.9rem; background: linear-gradient(135deg, #0284c7, #0369a1); display: inline-flex; align-items: center; gap: 6px;">
+            📂 انتخاب فایل ترک IGC پرواز
+          </button>
+          <button type="button" class="btn-submit" onclick="openLogModal()" style="margin-top: 0; width: auto; padding: 11px 18px; font-size: 0.9rem; background: #172c47; border: 1px solid var(--card-border);">
+            ✍️ ثبت دستی یا لینک XContest
+          </button>
+        </div>
+        <input type="file" id="stud-direct-igc" accept=".igc,.IGC" style="display: none;" onchange="handleStudentDirectIgc(event)">
       </div>
 
       <div class="stats-grid">
@@ -797,7 +816,7 @@
 
   <script>
     // State
-    let currentRole = 'instructor'; // 'instructor' or 'student'
+    let currentRole = localStorage.getItem('paragliding_current_role') || 'student'; // Default to student for all students
     let currentStudentId = null;
     let students = [];
     let allFlights = [];
@@ -835,54 +854,44 @@
       localStorage.setItem('paragliding_team_flights', JSON.stringify(allFlights));
     }
 
-    // Role Switching
+        // Role Switching
     function promptSwitchRole() {
       if (currentRole === 'instructor') {
-        // Switch to student
-        if (students.length === 0) {
-          alert('لطفاً ابتدا حداقل یک هنرجو در لیست ثبت کنید.');
-          return;
-        }
-        let listStr = "خلبان مورد نظر را انتخاب کنید:\n";
-        students.forEach((s, idx) => {
-          listStr += (idx + 1) + ". " + s.name + " (" + s.level + ")\n";
-        });
-        const choice = prompt(listStr);
-        const idx = parseInt(choice) - 1;
-        if (idx >= 0 && idx < students.length) {
-          currentRole = 'student';
-          currentStudentId = students[idx].id;
-          renderApp();
-        }
+        currentRole = 'student';
+        localStorage.setItem('paragliding_current_role', 'student');
+        renderApp();
       } else {
-        // Switch back to instructor (requires PIN)
-        const pin = prompt('رمز عبور مربی را وارد کنید:', '1234');
+        const pin = prompt('رمز عبور مربی (نوید) را وارد کنید:', '1234');
         if (pin === instructorPin) {
           currentRole = 'instructor';
-          currentStudentId = null;
+          localStorage.setItem('paragliding_current_role', 'instructor');
           renderApp();
-        } else {
+        } else if (pin !== null) {
           alert('رمز عبور اشتباه است.');
         }
       }
     }
 
-    function renderApp() {
+        function renderApp() {
       const badge = document.getElementById('role-badge');
       const btnRole = document.getElementById('btn-role');
 
       if (currentRole === 'instructor') {
         badge.className = 'badge-role badge-instructor';
         badge.innerText = 'مربی (نوید)';
-        btnRole.innerText = 'ورود به عنوان هنرجو';
+        btnRole.innerText = 'نمای هنرجو';
+        btnRole.style.borderColor = 'var(--card-border)';
+        btnRole.style.color = 'var(--text)';
         renderInstructorNav();
         navigate('inst-roster');
         renderInstructorView();
       } else {
-        const student = students.find(s => s.id === currentStudentId) || students[0];
+        const ident = getOrCreateStudentIdentity();
         badge.className = 'badge-role badge-student';
-        badge.innerText = 'خلبان: ' + (student ? student.name : '');
-        btnRole.innerText = 'ورود به پنل مربی';
+        badge.innerText = 'خلبان: ' + ident.name;
+        btnRole.innerText = '🔐 ورود مربی';
+        btnRole.style.borderColor = 'var(--gold)';
+        btnRole.style.color = 'var(--gold)';
         renderStudentNav();
         navigate('stud-flights');
         renderStudentView();
@@ -1054,12 +1063,10 @@
 
     // Student Views
     function renderStudentView() {
-      const student = students.find(s => s.id === currentStudentId);
-      if (!student) return;
+      const ident = getOrCreateStudentIdentity();
+      document.getElementById('disp-student-name').innerText = ident.name;
 
-      document.getElementById('disp-student-name').innerText = student.name + ' (' + student.level + ')';
-
-      const myFlights = allFlights.filter(f => f.studentId === student.id);
+      const myFlights = allFlights.filter(f => f.studentId === ident.id || f.studentName === ident.name);
       document.getElementById('stud-flight-count').innerText = myFlights.length;
       const totalMinutes = myFlights.reduce((acc, f) => acc + (parseInt(f.duration) || 0), 0);
       document.getElementById('stud-airtime').innerText = (totalMinutes / 60).toFixed(1) + "h";
@@ -1167,19 +1174,24 @@
 
     function handleLogFlightSubmit(e) {
       e.preventDefault();
-      const pilotSelect = document.getElementById('f-pilot-select');
-      const selectedId = pilotSelect ? pilotSelect.value : currentStudentId;
-      let pilotName = 'نوید (مربی)';
-      let studentId = selectedId || 'inst_navid';
+      let pilotName = 'هنرجو';
+      let studentId = 'stud_' + Date.now();
 
-      if (selectedId === 'inst_navid') {
-        pilotName = 'نوید (مربی)';
-      } else {
-        const student = students.find(s => s.id === selectedId);
-        if (student) {
-          pilotName = student.name;
-          studentId = student.id;
+      if (currentRole === 'instructor') {
+        const pilotSelect = document.getElementById('f-pilot-select');
+        const selectedId = pilotSelect ? pilotSelect.value : 'inst_navid';
+        if (selectedId === 'inst_navid') {
+          pilotName = 'نوید (مربی)';
+          studentId = 'inst_navid';
+        } else {
+          const s = students.find(item => item.id === selectedId);
+          pilotName = s ? s.name : 'هنرجو';
+          studentId = selectedId;
         }
+      } else {
+        const ident = getOrCreateStudentIdentity();
+        pilotName = ident.name;
+        studentId = ident.id;
       }
 
       const newF = {
@@ -1438,6 +1450,57 @@
           banner.innerHTML = `✓ لینک XContest برای خلبان <strong>${username}</strong> در تاریخ <strong>${year}/${month}/${day}</strong> متصل شد. لینک ۳بعدی روی پرواز ذخیره می‌شود.`;
         }
       }
+    }
+
+
+    function getOrCreateStudentIdentity() {
+      let savedName = localStorage.getItem('paragliding_my_student_name');
+      if (!savedName) {
+        savedName = 'هنرجوی پرواز';
+      }
+      let myId = localStorage.getItem('paragliding_my_student_id');
+      if (!myId) {
+        myId = 'stud_' + Date.now();
+        localStorage.setItem('paragliding_my_student_id', myId);
+      }
+      return { id: myId, name: savedName };
+    }
+
+    function changeStudentIdentity() {
+      const current = getOrCreateStudentIdentity();
+      const newName = prompt('نام و نام خانوادگی خود (خلبان) را وارد کنید:', current.name === 'هنرجوی پرواز' ? '' : current.name);
+      if (newName && newName.trim()) {
+        localStorage.setItem('paragliding_my_student_name', newName.trim());
+        // Also register in students list if not present
+        const myId = localStorage.getItem('paragliding_my_student_id') || ('stud_' + Date.now());
+        localStorage.setItem('paragliding_my_student_id', myId);
+        
+        let existing = students.find(s => s.id === myId);
+        if (existing) {
+          existing.name = newName.trim();
+        } else {
+          students.push({ id: myId, name: newName.trim(), level: 'هنرجو', appiId: '', phone: '' });
+        }
+        saveState();
+        renderStudentView();
+      }
+    }
+
+    function handleStudentDirectIgc(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = parseIgcContent(e.target.result);
+          openLogModal();
+          applyParsedFlightData(parsed, file.name);
+        } catch(err) {
+          alert('خطا در پردازش فایل IGC: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
   </script>
